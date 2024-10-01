@@ -7,7 +7,11 @@
   "authors": [
     "XIAYM-gh"
   ],
-  "contact": {},
+  "contact": {
+    "homepage": "https://github.com/NLR-DevTeam/Fcitx5-Enhancer",
+    "issues": "https://github.com/NLR-DevTeam/Fcitx5-Enhancer/issues",
+    "sources": "https://github.com/NLR-DevTeam/Fcitx5-Enhancer"
+  },
   "license": "MIT",
   "icon": "assets/fcitx5-enhancer/icon.png",
   "environment": "client",
