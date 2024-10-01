@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "fcitx5-enhancer",
+  "version": "${version}",
+  "name": "Fcitx5 Enhancer",
+  "description": "Enhances fcitx5 users' game experience.",
+  "authors": [
+    "XIAYM-gh"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/fcitx5-enhancer/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "cn.xiaym.fcitx5.Main"
+    ]
+  },
+  "mixins": [
+    "fcitx5-enhancer.mixins.json"
+  ],
+  "depends": {
+    "minecraft": "${minecraft_version}"
+  }
+}

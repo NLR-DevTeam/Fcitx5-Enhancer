@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "cn.xiaym.fcitx5.mixins",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "KeyboardMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
