@@ -18,9 +18,8 @@ public class KeyboardMixin {
             GLFW.GLFW_KEY_BACKSPACE,
             GLFW.GLFW_KEY_ESCAPE, GLFW.GLFW_KEY_ENTER,
             GLFW.GLFW_KEY_TAB,
-            GLFW.GLFW_KEY_MINUS, GLFW.GLFW_KEY_EQUAL,
-            GLFW.GLFW_KEY_APOSTROPHE,
-            GLFW.GLFW_KEY_GRAVE_ACCENT
+            GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_DOWN,
+            GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_RIGHT
     );
 
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
