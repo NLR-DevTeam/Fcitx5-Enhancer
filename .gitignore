@@ -4,4 +4,6 @@
 build/
 out/
 
-/run/
+run/
+
+/versions/**/src

@@ -2,11 +2,13 @@
   "required": true,
   "minVersion": "0.8",
   "package": "cn.xiaym.fcitx5.mixins",
-  "compatibilityLevel": "JAVA_21",
-  "mixins": [
-    "KeyboardMixin"
-  ],
+  "compatibilityLevel": "JAVA_8",
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "client": [
+    "KeyboardMixin",
+    "MinecraftClientMixin",
+    "TextFieldWidgetMixin"
+  ]
 }

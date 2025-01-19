@@ -4,6 +4,30 @@ pluginManagement {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
         }
+
+        // Required by preprocessor
+        maven {
+            name 'JitPack'
+            url 'https://jitpack.io'
+        }
+
         gradlePluginPortal()
     }
 }
+
+includeBuild('preprocessor')
+
+def versions = [
+        '1.16.5',
+        '1.20.4', '1.20.6',
+        '1.21.4'
+]
+
+for (String version : versions) {
+    include(":$version")
+    def proj = project(":$version")
+    proj.projectDir = file("versions/$version")
+    proj.buildFileName = '../' + versions.last + '/build.gradle'
+}
+
+include(':fabricWrapper')

@@ -1,0 +1,73 @@
+import groovy.json.JsonBuilder
+
+plugins {
+    id 'java-library'
+}
+
+group(project.maven_group)
+version(project.parent.version)
+
+base {
+    archivesName = "${project.archives_base_name}-${project.mod_version}-all"
+}
+
+def fabric_subprojects = project.parent.subprojects.findAll({
+    it.name != "fabricWrapper"
+})
+
+fabric_subprojects.collect {
+    evaluationDependsOn(":${it.name}")
+}
+
+jar {
+    // disable cache
+    outputs.upToDateWhen { false }
+
+    dependsOn(fabric_subprojects.collect {
+        it.tasks.remapJar
+    })
+
+    doFirst {
+        delete fileTree("build/tmp/submods/META-INF/jars")
+
+        copy {
+            from {
+                fabric_subprojects.collect {
+                    it.remapJar.outputs.files
+                }
+            }
+
+            into("build/tmp/submods/META-INF/jars")
+        }
+    }
+
+    from("../LICENSE")
+    from("build/tmp/submods")
+}
+
+processResources {
+    // disable cache
+    outputs.upToDateWhen { false }
+    ArrayList<?> mc_condition = []
+    ArrayList<?> jars = []
+
+    fabric_subprojects.each({
+        Arrays.stream(it.minecraft_dependency.split(','))
+                .map { it.trim() }
+                .forEach { mc_condition.add(it) }
+        jars.add(["file": "META-INF/jars/${project.archives_base_name}-${project.mod_version}-${it.minecraft_version}.jar"])
+    })
+
+    filesMatching("fabric.mod.json") {
+        expand([
+                "minecraft_dependency": new JsonBuilder(mc_condition),
+                "version"             : project.mod_version,
+                "sub_jars"            : new JsonBuilder(jars).toPrettyString(),
+        ])
+    }
+}
+
+java {
+    sourceCompatibility(JavaVersion.VERSION_1_8)
+    targetCompatibility(JavaVersion.VERSION_1_8)
+}

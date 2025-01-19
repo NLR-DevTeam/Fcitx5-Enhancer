@@ -14,8 +14,8 @@ So, I wrote this mod, in order to deal with this annoying problem.
 ## Notice
 
 This mod uses [a native library](/src/native/) to detect fcitx5 input window.  
-And the default one is designed for Linux x86_64 (glibc).  
-if your system is different, please compile one yourself as following.
+And the default one is designed for Linux x86_64 (glibc 2.40, from Arch Linux).  
+if your system is incompatible with it, please compile one yourself as following.
 
 ## Compiling the native library
 

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "fcitx5-enhancer-${minecraft_version_id}",
+  "id": "fcitx5-enhancer",
   "version": "${version}",
-  "name": "Fcitx5 Enhancer for ${minecraft_version}",
+  "name": "Fcitx5 Enhancer",
   "description": "Enhances fcitx5 users' game experience.",
   "authors": [
     "XIAYM-gh"
@@ -13,23 +13,10 @@
     "sources": "https://github.com/NLR-DevTeam/Fcitx5-Enhancer"
   },
   "license": "MIT",
+  "icon": "assets/fcitx5-enhancer/icon.png",
   "environment": "client",
-  "entrypoints": {
-    "client": [
-      "cn.xiaym.fcitx5.Main"
-    ]
-  },
-  "mixins": [
-    "fcitx5-enhancer.mixins.json"
-  ],
   "depends": {
     "minecraft": ${minecraft_dependency}
   },
-  "custom": {
-    "modmenu:clientsideOnly": true,
-    "modmenu:parent": "fcitx5-enhancer",
-    "modmenu": {
-      "parent": "fcitx5-enhancer"
-    }
-  }
+  "jars": ${sub_jars}
 }
