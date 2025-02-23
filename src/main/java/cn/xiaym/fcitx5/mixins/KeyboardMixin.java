@@ -14,9 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * This mixin intercepts key events when the user is typing using Fcitx 5,
  * which avoids unexpected screen closing or interaction.
- * <p>
- * Also, it temporarily disables text input after opening the chat screen,
- * which avoids 't' or '//' appearing in the input box unexpectedly.
  */
 @Mixin(Keyboard.class)
 public class KeyboardMixin {

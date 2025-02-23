@@ -7,6 +7,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * This class intercepts duplicated input events (using Main#allowToType),
+ * which avoids 't' or '//' appearing in the input box unexpectedly.
+ */
 @Mixin(TextFieldWidget.class)
 public class TextFieldWidgetMixin {
     @Inject(method = "write", at = @At("HEAD"), cancellable = true)

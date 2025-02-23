@@ -6,6 +6,7 @@
   "injectors": {
     "defaultRequire": 1
   },
+  "plugin": "cn.xiaym.fcitx5.mixins.Plugin",
   "client": [
     "KeyboardMixin",
     "MinecraftClientMixin",

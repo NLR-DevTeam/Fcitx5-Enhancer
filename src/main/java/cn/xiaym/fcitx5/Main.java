@@ -12,14 +12,48 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 
+/**
+ * This is the client entry point of the mod. <br/>
+ * It loads the native library, and does nothing else.
+ *
+ * @see Fcitx5
+ */
 @SuppressWarnings("SimplifyOptionalCallChains")
 public class Main implements ClientModInitializer {
+    /**
+     * Indicates if the operating system is Windows.
+     * <br/><br/>
+     * Fcitx5-Enhancer is **not** able to run on Windows, and it will cause crashes initially.
+     * We use this constant to avoid crashes and make it safe for mod-pack developers.
+     */
+    public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
+
     private static final Logger LOGGER = LogManager.getLogger("Fcitx5-Enhancer");
+
+    /**
+     * Indicates if the chat screen is open, used to intercept the user's input event.
+     *
+     * @see cn.xiaym.fcitx5.mixins.TextFieldWidgetMixin
+     */
     public static boolean chatScrOpening = false;
+
+    /**
+     * Decides if the user can pass input events to the game. <br/>
+     * Used to intercept duplicated input events. <br/>
+     * <br/>
+     * The internal logic is: <br/>
+     *  * First, the user opens the chat screen, here becomes false; <br/>
+     *  * Then, the user clicked on their keyboard, here becomes true.
+     */
     public static boolean allowToType = false;
 
     @Override
     public void onInitializeClient() {
+        if (IS_WINDOWS) {
+            LOGGER.warn("Warning - You're trying loading Fcitx5-Enhancer on Windows, which is unsupported! - Disabling.");
+            return;
+        }
+
         Optional<ModContainer> parent = FabricLoader.getInstance().getModContainer("fcitx5-enhancer");
         if (!parent.isPresent()) {
             throw new IllegalStateException("Can't find parent mod, please do not install fcitx5-enhancer's sub-JAR separately.");
