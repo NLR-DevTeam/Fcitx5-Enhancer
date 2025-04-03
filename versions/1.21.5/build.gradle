@@ -20,28 +20,32 @@ dependencies {
     runtimeOnly project(':fabricWrapper')
 }
 
+String dependencyString = project.minecraft_dependency
+if (dependencyString.contains(",")) {
+    List<?> processedDependency = Arrays.stream(dependencyString.split(','))
+            .map { it.trim() }
+            .toList()
+
+    dependencyString = new JsonBuilder(processedDependency)
+} else {
+    dependencyString = "\"${dependencyString}\""
+}
+
+Map<String, ?> properties = [
+        "version"             : project.version,
+        "minecraft_version"   : project.minecraft_version,
+        "minecraft_version_id": project.minecraft_version.replace(".", "-"),
+        "minecraft_dependency": dependencyString
+]
+
 processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version
     inputs.property "loader_version", project.loader_version
     filteringCharset = "UTF-8"
 
-    String dependencyString = project.minecraft_dependency
-    if (dependencyString.contains(",")) {
-        List<?> processedDependency = Arrays.stream(dependencyString.split(','))
-                .map { it.trim() }
-                .toList()
-
-        dependencyString = new JsonBuilder(processedDependency)
-    } else {
-        dependencyString = "\"${dependencyString}\""
-    }
-
     filesMatching("fabric.mod.json") {
-        expand "version": project.version,
-                "minecraft_version": project.minecraft_version,
-                "minecraft_version_id": project.minecraft_version.replace(".", "-"),
-                "minecraft_dependency": dependencyString
+        expand(properties)
     }
 }
 

@@ -4,8 +4,8 @@ plugins {
     id 'java-library'
 }
 
-group(project.maven_group)
-version(project.parent.version)
+group = project.maven_group
+version = project.parent.version
 
 base {
     archivesName = "${project.archives_base_name}-${project.mod_version}-all"
@@ -45,29 +45,32 @@ jar {
     from("build/tmp/submods")
 }
 
+ArrayList<?> mc_condition = []
+ArrayList<?> jars = []
+
+fabric_subprojects.each({
+    Arrays.stream(it.minecraft_dependency.split(','))
+            .map { it.trim() }
+            .forEach { mc_condition.add(it) }
+    jars.add(["file": "META-INF/jars/${project.archives_base_name}-${project.mod_version}-${it.minecraft_version}.jar"])
+})
+
+Map<String, ?> properties = [
+        "minecraft_dependency": new JsonBuilder(mc_condition),
+        "version"         : project.mod_version,
+        "sub_jars"            : new JsonBuilder(jars).toPrettyString(),
+]
+
 processResources {
     // disable cache
     outputs.upToDateWhen { false }
-    ArrayList<?> mc_condition = []
-    ArrayList<?> jars = []
-
-    fabric_subprojects.each({
-        Arrays.stream(it.minecraft_dependency.split(','))
-                .map { it.trim() }
-                .forEach { mc_condition.add(it) }
-        jars.add(["file": "META-INF/jars/${project.archives_base_name}-${it.minecraft_version}-${project.mod_version}.jar"])
-    })
 
     filesMatching("fabric.mod.json") {
-        expand([
-                "minecraft_dependency": new JsonBuilder(mc_condition),
-                "version"             : project.mod_version,
-                "sub_jars"            : new JsonBuilder(jars).toPrettyString(),
-        ])
+        expand(properties)
     }
 }
 
 java {
-    sourceCompatibility(JavaVersion.VERSION_1_8)
-    targetCompatibility(JavaVersion.VERSION_1_8)
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }

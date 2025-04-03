@@ -5,7 +5,7 @@ buildscript {
 }
 
 plugins {
-    id 'fabric-loom' version '1.9-SNAPSHOT' apply false
+    id 'fabric-loom' version '1.10-SNAPSHOT' apply false
     id 'com.replaymod.preprocess'
 }
 
@@ -19,5 +19,5 @@ preprocess {
     mc1204.link(mc1206, null)
     mc1206.link(mc1215, null)
 
-    strictExtraMappings.set(true)
+    strictExtraMappings.set(false)
 }
