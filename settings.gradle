@@ -18,9 +18,7 @@ pluginManagement {
 includeBuild('preprocessor')
 
 def versions = [
-        '1.16.5',
-        '1.20.4', '1.20.6',
-        '1.21.5'
+        '25w14craftmine'
 ]
 
 for (String version : versions) {
