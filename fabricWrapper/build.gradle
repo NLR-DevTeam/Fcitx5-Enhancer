@@ -52,7 +52,7 @@ fabric_subprojects.each({
     Arrays.stream(it.minecraft_dependency.split(','))
             .map { it.trim() }
             .forEach { mc_condition.add(it) }
-    jars.add(["file": "META-INF/jars/${project.archives_base_name}-${project.mod_version}-${it.minecraft_version}.jar"])
+    jars.add(["file": "META-INF/jars/${project.archives_base_name}-${it.minecraft_version}-${project.mod_version}.jar"])
 })
 
 Map<String, ?> properties = [
