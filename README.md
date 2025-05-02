@@ -14,7 +14,7 @@ So, I wrote this mod, in order to deal with this annoying problem.
 ## Notice
 
 This mod uses [a native library](/src/native/) to detect fcitx5 input window.  
-And the default one is designed for Linux x86_64 (glibc 2.40, from Arch Linux).  
+And the default one is designed for Linux x86_64 (glibc 2.31, from Debian 10).  
 if your system is incompatible with it, please compile one yourself as following.
 
 ## Compiling the native library
@@ -37,7 +37,7 @@ make
 ```
 
 And finally, you'll see the library named `libfcitx5_detector.so` under the `build` folder.  
-Rename it to `native.so` and place it inside folder `.minecraft/.fcitx5-enhancer`.
+Rename it to `native.so` and place it into folder `.minecraft/.fcitx5-enhancer`.
 
 ## License
 This project is licensed under [MIT License](/LICENSE.txt).
