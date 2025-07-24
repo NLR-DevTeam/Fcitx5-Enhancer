@@ -13,11 +13,11 @@ preprocess {
     def mc1165 = createNode('1.16.5', 1_16_05, 'mojang')
     def mc1204 = createNode('1.20.4', 1_20_04, 'mojang')
     def mc1206 = createNode('1.20.6', 1_20_06, 'mojang')
-    def mc1217 = createNode('1.21.7', 1_21_07, 'mojang')
+    def mc1218 = createNode('1.21.8', 1_21_08, 'mojang')
 
     mc1165.link(mc1204, null)
     mc1204.link(mc1206, null)
-    mc1206.link(mc1217, null)
+    mc1206.link(mc1218, null)
 
     strictExtraMappings.set(false)
 }
