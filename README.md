@@ -13,22 +13,25 @@ So, I wrote this mod, in order to deal with this annoying problem.
 
 ## Notice
 
-This mod uses [a native library](/src/native/) to detect fcitx5 input window.  
+This mod uses [a native library](/src/native) to detect fcitx5 input window.  
 And the default one is compiled for Linux x86_64 (glibc 2.31, from Debian 11).  
 if your system is incompatible with it, please compile one yourself as following.
 
 ## Compiling the native library
 
 Requirements:
- - A valid JDK installation (with JNI headers)
- - CMake
+
+- A valid JDK installation (with JNI headers)
+- CMake
 
 First, clone this repository, using:
+
 ```shell
 git clone https://github.com/NLR-DevTeam/Fcitx5-Enhancer --depth 1
 ```
 
 Then, compile the native library using:
+
 ```shell
 cd Fcitx5-Enhancer/src/native
 mkdir build && cd build
@@ -40,4 +43,5 @@ And finally, you'll see the library named `libfcitx5_detector.so` under the `bui
 Rename it to `native.so` and place it into folder `.minecraft/.fcitx5-enhancer`.
 
 ## License
+
 This project is licensed under [MIT License](/LICENSE.txt).

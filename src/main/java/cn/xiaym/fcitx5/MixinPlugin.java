@@ -1,6 +1,5 @@
-package cn.xiaym.fcitx5.mixins;
+package cn.xiaym.fcitx5;
 
-import cn.xiaym.fcitx5.Main;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -11,7 +10,7 @@ import java.util.Set;
 /**
  * This MixinConfigPlugin intercepts mixins' loading on Windows.
  */
-public class Plugin implements IMixinConfigPlugin {
+public class MixinPlugin implements IMixinConfigPlugin {
     @Override
     public boolean shouldApplyMixin(String s, String s1) {
         return !Main.IS_WINDOWS;

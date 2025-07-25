@@ -1,7 +1,7 @@
 import groovy.json.JsonBuilder
 
 plugins {
-    id 'java-library'
+    id 'java'
 }
 
 group = project.maven_group
@@ -11,8 +11,10 @@ base {
     archivesName = "${project.archives_base_name}-${project.mod_version}-all"
 }
 
+def common = project(':common')
+
 def fabric_subprojects = project.parent.subprojects.findAll({
-    it.name != "fabricWrapper"
+    !['fabricWrapper', 'common'].contains(it.name)
 })
 
 fabric_subprojects.collect {
@@ -20,12 +22,16 @@ fabric_subprojects.collect {
 }
 
 jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     // disable cache
     outputs.upToDateWhen { false }
 
     dependsOn(fabric_subprojects.collect {
         it.tasks.remapJar
     })
+
+    dependsOn(common.tasks.shadowJar)
 
     doFirst {
         delete fileTree("build/tmp/submods/META-INF/jars")
@@ -37,12 +43,13 @@ jar {
                 }
             }
 
-            into("build/tmp/submods/META-INF/jars")
+            into "build/tmp/submods/META-INF/jars"
         }
     }
 
     from("../LICENSE")
     from("build/tmp/submods")
+    from(zipTree(common.shadowJar.archiveFile.asFile))
 }
 
 ArrayList<?> mc_condition = []
@@ -57,8 +64,8 @@ fabric_subprojects.each({
 
 Map<String, ?> properties = [
         "minecraft_dependency": new JsonBuilder(mc_condition),
-        "version"         : project.mod_version,
-        "sub_jars"            : new JsonBuilder(jars).toPrettyString(),
+        "version"             : project.mod_version,
+        "sub_jars"            : new JsonBuilder(jars).toPrettyString()
 ]
 
 processResources {
@@ -71,6 +78,6 @@ processResources {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }

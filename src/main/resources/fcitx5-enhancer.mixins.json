@@ -6,10 +6,12 @@
   "injectors": {
     "defaultRequire": 1
   },
-  "plugin": "cn.xiaym.fcitx5.mixins.Plugin",
+  "plugin": "cn.xiaym.fcitx5.MixinPlugin",
   "client": [
     "KeyboardMixin",
     "MinecraftClientMixin",
-    "TextFieldWidgetMixin"
+    "ScreenMixin",
+    "TextFieldWidgetMixin",
+    "WindowMixin"
   ]
 }

@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+    id 'com.gradleup.shadow' version '9.0.0-rc2'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.github.hypfvieh:dbus-java-core:5.1.1'
+    implementation 'com.github.hypfvieh:dbus-java-transport-native-unixsocket:5.1.1'
+    compileOnly 'org.apache.logging.log4j:log4j-core:2.24.1'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+shadowJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    minimize()
+    relocate('org.freedesktop.dbus', 'cn.xiaym.fcitx5.deps.dbus')
+    include('META-INF/services/cn.*', 'cn/**', 'org/**')
+    exclude('**/tmp/ClassRefs.class')
+
+    dependencies {
+        // Unneeded
+        exclude dependency(':slf4j-api')
+    }
+}
