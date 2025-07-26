@@ -10,7 +10,6 @@
   "client": [
     "KeyboardMixin",
     "MinecraftClientMixin",
-    "ScreenMixin",
     "TextFieldWidgetMixin",
     "WindowMixin"
   ]

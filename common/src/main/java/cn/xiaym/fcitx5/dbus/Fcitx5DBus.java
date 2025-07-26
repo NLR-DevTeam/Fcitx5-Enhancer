@@ -1,6 +1,7 @@
-package cn.xiaym.fcitx5;
+package cn.xiaym.fcitx5.dbus;
 
-import cn.xiaym.fcitx5.dbus.Fcitx5Controller;
+import cn.xiaym.fcitx5.Fcitx5;
+import cn.xiaym.fcitx5.async.AsyncDispatcher;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -9,6 +10,7 @@ import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * The D-Bus related binding interface.
@@ -18,8 +20,9 @@ public class Fcitx5DBus {
     public static final int STATE_UNKNOWN = 0;
     public static final int STATE_INACTIVE = 1;
     public static final int STATE_ACTIVE = 2;
+    private static final AsyncDispatcher STATE_DISPATCHER = new AsyncDispatcher();
     private static DBusConnection connection;
-    private static Fcitx5Controller controller;
+    private static Fcitx5Controller1 controller;
 
     static {
         // DON'T SPAM!
@@ -47,10 +50,11 @@ public class Fcitx5DBus {
 
         if (connection != null) {
             try {
-                controller = connection.getRemoteObject("org.fcitx.Fcitx5", "/controller", Fcitx5Controller.class);
+                controller = connection.getRemoteObject("org.fcitx.Fcitx5", "/controller", Fcitx5Controller1.class);
             } catch (Exception ex) {
                 connection = null;
                 controller = null;
+
                 Fcitx5.LOGGER.warn("Can't get Fcitx5 Controller. Relevant functionalities will be disabled.", ex);
             }
         } else {
@@ -65,17 +69,18 @@ public class Fcitx5DBus {
 
         if (!connection.isConnected()) {
             tryInit();
+            return checkDBus();
         }
 
         return true;
     }
 
-    public static int getState() {
+    public static CompletableFuture<Integer> getStateAsync() {
         if (!checkDBus()) {
-            return STATE_UNKNOWN;
+            return CompletableFuture.completedFuture(STATE_UNKNOWN);
         }
 
-        return controller.state();
+        return CompletableFuture.supplyAsync(() -> controller.state());
     }
 
     public static void activate() {
@@ -83,7 +88,7 @@ public class Fcitx5DBus {
             return;
         }
 
-        controller.activate();
+        STATE_DISPATCHER.dispatch(controller::activate);
     }
 
     public static void deactivate() {
@@ -91,6 +96,6 @@ public class Fcitx5DBus {
             return;
         }
 
-        controller.deactivate();
+        STATE_DISPATCHER.dispatch(controller::deactivate);
     }
 }

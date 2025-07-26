@@ -1,4 +1,4 @@
-package cn.xiaym.fcitx5.tmp;
+package cn.xiaym.fcitx5.internal;
 
 /**
  * This class is only used at compile time, will be deleted during the packaging process.

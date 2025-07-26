@@ -5,7 +5,7 @@ import org.freedesktop.dbus.annotations.DBusMemberName;
 import org.freedesktop.dbus.interfaces.DBusInterface;
 
 @DBusInterfaceName("org.fcitx.Fcitx.Controller1")
-public interface Fcitx5Controller extends DBusInterface {
+public interface Fcitx5Controller1 extends DBusInterface {
     @DBusMemberName("State")
     int state();
 

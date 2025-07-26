@@ -1,6 +1,6 @@
 package cn.xiaym.fcitx5.mixins;
 
-import cn.xiaym.fcitx5.Fcitx5DBus;
+import cn.xiaym.fcitx5.dbus.Fcitx5DBus;
 import cn.xiaym.fcitx5.Main;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -21,7 +21,7 @@ public class MinecraftClientMixin {
         if (screen == null) {
             if (!afterInGame) {
                 afterInGame = true;
-                Main.initialState = Fcitx5DBus.getState();
+                Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> Main.initialState = it);
             }
 
             Fcitx5DBus.deactivate();

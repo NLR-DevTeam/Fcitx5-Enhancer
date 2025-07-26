@@ -1,7 +1,7 @@
 package cn.xiaym.fcitx5.mixins;
 
-import cn.xiaym.fcitx5.Fcitx5DBus;
 import cn.xiaym.fcitx5.Main;
+import cn.xiaym.fcitx5.dbus.Fcitx5DBus;
 import net.minecraft.client.util.Window;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,15 +27,8 @@ public class WindowMixin {
     @Unique
     private static void switchToInitial() {
         switch (Main.initialState) {
-            case Fcitx5DBus.STATE_INACTIVE -> {
-                Fcitx5DBus.activate();
-                Main.initialState = Fcitx5DBus.STATE_ACTIVE;
-            }
-
-            case Fcitx5DBus.STATE_ACTIVE -> {
-                Fcitx5DBus.deactivate();
-                Main.initialState = Fcitx5DBus.STATE_INACTIVE;
-            }
+            case Fcitx5DBus.STATE_INACTIVE -> Fcitx5DBus.deactivate();
+            case Fcitx5DBus.STATE_ACTIVE -> Fcitx5DBus.activate();
         }
     }
 
@@ -57,7 +50,7 @@ public class WindowMixin {
         }
 
         if (!minimized) {
-            Main.initialState = Fcitx5DBus.getState();
+            Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> Main.initialState = it);
             return;
         }
 
@@ -71,7 +64,7 @@ public class WindowMixin {
         }
 
         if (focused) {
-            Main.initialState = Fcitx5DBus.getState();
+            Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> Main.initialState = it);
             return;
         }
 
