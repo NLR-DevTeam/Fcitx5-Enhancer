@@ -27,8 +27,17 @@ public class WindowMixin {
     @Unique
     private static void switchToInitial() {
         switch (Main.initialState) {
-            case Fcitx5DBus.STATE_INACTIVE -> Fcitx5DBus.deactivate();
-            case Fcitx5DBus.STATE_ACTIVE -> Fcitx5DBus.activate();
+            case Fcitx5DBus.STATE_INACTIVE -> Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> {
+                if (it != Fcitx5DBus.STATE_INACTIVE) {
+                    Fcitx5DBus.deactivate();
+                }
+            });
+
+            case Fcitx5DBus.STATE_ACTIVE -> Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> {
+                if (it != Fcitx5DBus.STATE_ACTIVE) {
+                    Fcitx5DBus.deactivate();
+                }
+            });
         }
     }
 

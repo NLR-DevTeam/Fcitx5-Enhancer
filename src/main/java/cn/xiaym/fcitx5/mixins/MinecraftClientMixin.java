@@ -24,13 +24,19 @@ public class MinecraftClientMixin {
                 Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> Main.initialState = it);
             }
 
-            Fcitx5DBus.deactivate();
+            Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> {
+                if (it != Fcitx5DBus.STATE_INACTIVE) {
+                    Fcitx5DBus.deactivate();
+                }
+            });
         } else {
             afterInGame = false;
 
-            if (Main.initialState == Fcitx5DBus.STATE_ACTIVE) {
-                Fcitx5DBus.activate();
-            }
+            Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> {
+                if (Main.initialState == Fcitx5DBus.STATE_ACTIVE && it != Fcitx5DBus.STATE_ACTIVE) {
+                    Fcitx5DBus.activate();
+                }
+            });
         }
 
         boolean isChatScreen = screen instanceof ChatScreen;
