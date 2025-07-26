@@ -2,7 +2,13 @@
   "fcitx5.config.title": "Fcitx5 Enhancer 配置",
   "fcitx5.config.category.general": "通用",
   "fcitx5.config.general.imBlockerEnabled.title": "启用 Fcitx5 Blocker",
-  "fcitx5.config.general.imBlockerEnabled.tooltip": "指定是否应该根据您的设置来自动关闭、开启输入法，与 IMBlocker 模组类似，但有更好的性能。",
+  "fcitx5.config.general.imBlockerEnabled.tooltip": "指定是否应该根据您的设置来自动关闭、开启输入法，与 IMBlocker 模组类似，但性能更好。",
   "fcitx5.config.general.restoreInitialState.title": "在失焦时恢复输入法状态",
-  "fcitx5.config.general.restoreInitialState.tooltip": "当 Minecraft 最小化或失去焦点时自动恢复输入法的开启状态。\n\n* 如果你启用了“共享输入状态”，那么请打开这个选项。"
+  "fcitx5.config.general.restoreInitialState.tooltip": "当 Minecraft 窗口最小化或失去焦点时自动恢复输入法的启用状态。\n\n* 如果你开启了“共享输入状态”，那么请打开这个选项。",
+  "fcitx5.config.category.builtinRules": "内置规则",
+  "fcitx5.config.builtinRules.subCategory.commandInput": "输入命令时",
+  "fcitx5.config.builtinRules.commandInput.directInput.title": "在直接输入时防止输入法启用",
+  "fcitx5.config.builtinRules.commandInput.directInput.tooltip": "指定在直接输入命令时，是否应该阻止输入法开启。\n\n包括：\n - 点击“%s”键\n - 点击带有命令建议消息组件的告示牌",
+  "fcitx5.config.builtinRules.commandInput.later.title": "在后续输入时禁用输入法",
+  "fcitx5.config.builtinRules.commandInput.later.tooltip": "指定在输入框组件中输入“/”时，输入法是否应该被禁用。\n\n包括：\n - 先打开聊天栏，后输入一个“/”\n - 点击带有命令建议组件的消息"
 }

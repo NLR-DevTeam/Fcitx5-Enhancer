@@ -5,8 +5,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
+import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
+import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 
@@ -20,6 +23,8 @@ public class ModConfig {
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("fcitx5-enhancer.json");
     public static boolean imBlockerEnabled = true;
     public static boolean restoreInitialState = false;
+    public static boolean builtinCommandSuppressDirect = true;
+    public static boolean builtinCommandDisableLater = true;
 
     static {
         try {
@@ -96,6 +101,25 @@ public class ModConfig {
                         .setDefaultValue(false)
                         .setSaveConsumer(newValue -> restoreInitialState = newValue)
                         .build());
+
+        ConfigCategory builtinRulesCategory = builder.getOrCreateCategory(Text.translatable("fcitx5.config.category.builtinRules"));
+        SubCategoryBuilder commandInputSubCategory = entryBuilder.startSubCategory(Text.translatable("fcitx5.config.builtinRules.subCategory.commandInput"))
+                .setExpanded(true);
+        commandInputSubCategory.add(entryBuilder
+                .startBooleanToggle(Text.translatable("fcitx5.config.builtinRules.commandInput.directInput.title"), builtinCommandSuppressDirect)
+                .setTooltip(Text.translatable("fcitx5.config.builtinRules.commandInput.directInput.tooltip", MinecraftClient.getInstance().options.commandKey.getBoundKeyLocalizedText()))
+                .setDefaultValue(true)
+                .setSaveConsumer(newValue -> builtinCommandSuppressDirect = newValue)
+                .build());
+        commandInputSubCategory.add(entryBuilder
+                .startBooleanToggle(Text.translatable("fcitx5.config.builtinRules.commandInput.later.title"), builtinCommandDisableLater)
+                .setTooltip(Text.translatable("fcitx5.config.builtinRules.commandInput.later.tooltip"))
+                .setDefaultValue(true)
+                .setSaveConsumer(newValue -> builtinCommandDisableLater = newValue)
+                .build());
+
+        builtinRulesCategory
+                .addEntry(commandInputSubCategory.build());
 
         return builder.build();
     }

@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This is the client entry point of the mod. <br/>
@@ -24,14 +25,13 @@ public class Main implements ClientModInitializer {
      * We use this constant to avoid crashes and make it safe for mod-pack developers.
      */
     public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
-
+    private final static AtomicInteger SUPPRESS = new AtomicInteger(0);
     /**
      * Indicates if the chat screen is open, used to intercept the user's input event.
      *
      * @see cn.xiaym.fcitx5.mixins.TextFieldWidgetMixin
      */
     public static boolean chatScrOpening = false;
-
     /**
      * Decides if the user can pass input events to the game. <br/>
      * Used to intercept duplicated input events. <br/>
@@ -41,9 +41,25 @@ public class Main implements ClientModInitializer {
      * * Then, the user clicked on their keyboard, here becomes true.
      */
     public static boolean allowToType = false;
-
     public static boolean canFindDBus = false;
     public static int initialState;
+
+    public static void suppress() {
+        SUPPRESS.getAndIncrement();
+    }
+
+    public static void unsuppress() {
+        SUPPRESS.getAndDecrement();
+    }
+
+    public static boolean wasSuppressed() {
+        int i = SUPPRESS.get();
+        if (i < 0) {
+            SUPPRESS.set(0);
+        }
+
+        return i > 0;
+    }
 
     @Override
     public void onInitializeClient() {
