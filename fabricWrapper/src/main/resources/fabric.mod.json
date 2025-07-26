@@ -15,8 +15,16 @@
   "license": "MIT",
   "icon": "assets/fcitx5-enhancer/icon.png",
   "environment": "client",
+  "entrypoints": {
+    "modmenu": [
+      "cn.xiaym.fcitx5.compat.ModMenuEntry"
+    ]
+  },
   "depends": {
     "minecraft": ${minecraft_dependency}
+  },
+  "custom": {
+    "modmenu:clientsideOnly": true
   },
   "jars": ${sub_jars}
 }

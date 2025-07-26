@@ -1,0 +1,8 @@
+{
+  "fcitx5.config.title": "Fcitx5 Enhancer 配置",
+  "fcitx5.config.category.general": "通用",
+  "fcitx5.config.general.imBlockerEnabled.title": "启用 Fcitx5 Blocker",
+  "fcitx5.config.general.imBlockerEnabled.tooltip": "指定是否应该根据您的设置来自动关闭、开启输入法，与 IMBlocker 模组类似，但有更好的性能。",
+  "fcitx5.config.general.restoreInitialState.title": "在失焦时恢复输入法状态",
+  "fcitx5.config.general.restoreInitialState.tooltip": "当 Minecraft 最小化或失去焦点时自动恢复输入法的开启状态。\n\n* 如果你启用了“共享输入状态”，那么请打开这个选项。"
+}

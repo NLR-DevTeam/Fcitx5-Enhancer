@@ -1,5 +1,6 @@
 package cn.xiaym.fcitx5.mixins;
 
+import cn.xiaym.fcitx5.config.ModConfig;
 import cn.xiaym.fcitx5.dbus.Fcitx5DBus;
 import cn.xiaym.fcitx5.Main;
 import net.minecraft.client.MinecraftClient;
@@ -18,25 +19,27 @@ public class MinecraftClientMixin {
 
     @Inject(method = "setScreen", at = @At("HEAD"))
     private void setScreen(Screen screen, CallbackInfo ci) {
-        if (screen == null) {
-            if (!afterInGame) {
-                afterInGame = true;
-                Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> Main.initialState = it);
+        if (ModConfig.imBlockerEnabled) {
+            if (screen == null) {
+                if (!afterInGame) {
+                    afterInGame = true;
+                    Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> Main.initialState = it);
+                }
+
+                Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> {
+                    if (it != Fcitx5DBus.STATE_INACTIVE) {
+                        Fcitx5DBus.deactivate();
+                    }
+                });
+            } else {
+                afterInGame = false;
+
+                Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> {
+                    if (Main.initialState == Fcitx5DBus.STATE_ACTIVE && it != Fcitx5DBus.STATE_ACTIVE) {
+                        Fcitx5DBus.activate();
+                    }
+                });
             }
-
-            Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> {
-                if (it != Fcitx5DBus.STATE_INACTIVE) {
-                    Fcitx5DBus.deactivate();
-                }
-            });
-        } else {
-            afterInGame = false;
-
-            Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> {
-                if (Main.initialState == Fcitx5DBus.STATE_ACTIVE && it != Fcitx5DBus.STATE_ACTIVE) {
-                    Fcitx5DBus.activate();
-                }
-            });
         }
 
         boolean isChatScreen = screen instanceof ChatScreen;

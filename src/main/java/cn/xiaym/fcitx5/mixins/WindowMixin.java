@@ -1,6 +1,7 @@
 package cn.xiaym.fcitx5.mixins;
 
 import cn.xiaym.fcitx5.Main;
+import cn.xiaym.fcitx5.config.ModConfig;
 import cn.xiaym.fcitx5.dbus.Fcitx5DBus;
 import net.minecraft.client.util.Window;
 import org.spongepowered.asm.mixin.Final;
@@ -58,6 +59,10 @@ public class WindowMixin {
             return;
         }
 
+        if (!ModConfig.imBlockerEnabled || !ModConfig.restoreInitialState) {
+            return;
+        }
+
         if (!minimized) {
             Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> Main.initialState = it);
             return;
@@ -69,6 +74,10 @@ public class WindowMixin {
     @Inject(method = "onWindowFocusChanged", at = @At("HEAD"))
     public void onWindowFocusChanged(long window, boolean focused, CallbackInfo ci) {
         if (window != handle || !Main.canFindDBus) {
+            return;
+        }
+
+        if (!ModConfig.imBlockerEnabled || !ModConfig.restoreInitialState) {
             return;
         }
 

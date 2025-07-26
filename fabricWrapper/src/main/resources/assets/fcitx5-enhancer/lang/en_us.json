@@ -1,0 +1,8 @@
+{
+  "fcitx5.config.title": "Fcitx5 Enhancer Configuration",
+  "fcitx5.config.category.general": "General",
+  "fcitx5.config.general.imBlockerEnabled.title": "Enable Fcitx5 Blocker",
+  "fcitx5.config.general.imBlockerEnabled.tooltip": "Indicates if we should automatically deactivate & activate your IME according to your config, working like IMBlocker mod but with better performance.",
+  "fcitx5.config.general.restoreInitialState.title": "Restore IME State on Losing Focus",
+  "fcitx5.config.general.restoreInitialState.tooltip": "Automatically restores the initial input state of your IME when Minecraft gets minimized or unfocused.\n\n* If you have \"Share Input State\" enabled, please turn this option on."
+}
