@@ -1,4 +1,6 @@
 {
+  "fcitx5.screen.incompatibleNotice.title": "不兼容的系统",
+  "fcitx5.screen.incompatibleNotice.content": "Fcitx-Enhancer 只与 Linux 系统兼容，您可以安全的移除此模组。",
   "fcitx5.config.title": "Fcitx5 Enhancer 配置",
   "fcitx5.config.category.general": "通用",
   "fcitx5.config.general.imBlockerEnabled.title": "启用 Fcitx5 Blocker",

@@ -1,4 +1,6 @@
 {
+  "fcitx5.screen.incompatibleNotice.title": "Incompatible System",
+  "fcitx5.screen.incompatibleNotice.content": "Fcitx-Enhancer is only compatible with Linux, you can remove this mod safely.",
   "fcitx5.config.title": "Fcitx5 Enhancer Configuration",
   "fcitx5.config.category.general": "General",
   "fcitx5.config.general.imBlockerEnabled.title": "Enable Fcitx5 Blocker",

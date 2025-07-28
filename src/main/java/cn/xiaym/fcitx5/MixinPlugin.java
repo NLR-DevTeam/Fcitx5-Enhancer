@@ -13,7 +13,7 @@ import java.util.Set;
 public class MixinPlugin implements IMixinConfigPlugin {
     @Override
     public boolean shouldApplyMixin(String s, String s1) {
-        return !Main.IS_WINDOWS;
+        return Main.IS_LINUX;
     }
 
     @Override

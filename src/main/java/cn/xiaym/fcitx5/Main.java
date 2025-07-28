@@ -11,6 +11,12 @@ import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
+//#if MC <= 12105
+//$$ import cn.xiaym.fcitx5.compat.legacy.Rect;
+//$$ import java.util.HashSet;
+//$$ import java.util.Set;
+//#endif
+
 /**
  * This is the client entry point of the mod. <br/>
  * It loads the native library, and does nothing else.
@@ -24,7 +30,7 @@ public class Main implements ClientModInitializer {
      * Fcitx5-Enhancer is **not** able to run on Windows, and it will cause crashes initially.
      * We use this constant to avoid crashes and make it safe for mod-pack developers.
      */
-    public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
+    public static final boolean IS_LINUX = System.getProperty("os.name").toLowerCase().contains("linux");
     private final static AtomicInteger SUPPRESS = new AtomicInteger(0);
     /**
      * Indicates if the chat screen is open, used to intercept the user's input event.
@@ -43,6 +49,13 @@ public class Main implements ClientModInitializer {
     public static boolean allowToType = false;
     public static boolean canFindDBus = false;
     public static int initialState;
+
+    public static boolean selectingElement = false;
+
+    //#if MC <= 12105
+    //$$ public static boolean simulateDrawing = false;
+    //$$ public static Set<Rect> simulatedRectSet = new HashSet<>();
+    //#endif
 
     public static void suppress() {
         SUPPRESS.getAndIncrement();
@@ -63,8 +76,8 @@ public class Main implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        if (IS_WINDOWS) {
-            Fcitx5.LOGGER.warn("Warning - You're trying loading Fcitx5-Enhancer on Windows, which is unsupported! - Disabling.");
+        if (!IS_LINUX) {
+            Fcitx5.LOGGER.warn("Warning - You're trying loading Fcitx5-Enhancer on non-Linux platform, which is unsupported! - Disabling.");
             return;
         }
 

@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC <= 12106
+//#if MC <= 12006
 //$$ import net.minecraft.client.WindowEventHandler;
 //$$ import net.minecraft.client.WindowSettings;
 //$$ import net.minecraft.client.util.MonitorTracker;
@@ -53,7 +53,7 @@ public class WindowMixin {
             //$$ }
             //$$
             //$$ @Unique
-            //$$ public static void onMinimizeChanged(long mcHandle, long window, boolean minimized) {
+            //$$ private static void onMinimizeChanged(long mcHandle, long window, boolean minimized) {
             //$$ if (window != mcHandle || !Main.canFindDBus) {
             //#endif
             return;

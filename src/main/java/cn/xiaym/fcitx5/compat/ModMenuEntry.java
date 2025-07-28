@@ -1,6 +1,8 @@
 package cn.xiaym.fcitx5.compat;
 
+import cn.xiaym.fcitx5.Main;
 import cn.xiaym.fcitx5.config.ModConfig;
+import cn.xiaym.fcitx5.screen.IncompatibleNoticeScreen;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 
@@ -8,6 +10,6 @@ import com.terraformersmc.modmenu.api.ModMenuApi;
 public class ModMenuEntry implements ModMenuApi {
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return ModConfig::createScreen;
+        return Main.IS_LINUX ? ModConfig::createScreen : IncompatibleNoticeScreen::new;
     }
 }

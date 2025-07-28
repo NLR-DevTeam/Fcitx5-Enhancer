@@ -2,12 +2,14 @@
   "required": true,
   "minVersion": "0.8",
   "package": "cn.xiaym.fcitx5.mixins",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_17",
   "injectors": {
     "defaultRequire": 1
   },
   "plugin": "cn.xiaym.fcitx5.MixinPlugin",
   "client": [
+    "DrawContextMixin",
+    "GameRendererMixin",
     "KeyboardMixin",
     "MinecraftClientMixin",
     "TextFieldWidgetMixin",
