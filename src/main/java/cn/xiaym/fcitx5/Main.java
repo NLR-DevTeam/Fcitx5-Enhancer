@@ -3,6 +3,7 @@ package cn.xiaym.fcitx5;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.client.gui.Element;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,20 +19,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 //#endif
 
 /**
- * This is the client entry point of the mod. <br/>
- * It loads the native library, and does nothing else.
+ * Client entry point of the mod, saving few global states. <br>
  *
  * @see Fcitx5
  */
 public class Main implements ClientModInitializer {
     /**
-     * Indicates if the operating system is Windows.
-     * <br/><br/>
-     * Fcitx5-Enhancer is **not** able to run on Windows, and it will cause crashes initially.
+     * Indicates if the operating system is Linux.
+     * <br><br>
+     * Fcitx5-Enhancer is **not** able to run on OSs other than Linux, and it will cause crashes initially.
      * We use this constant to avoid crashes and make it safe for mod-pack developers.
      */
     public static final boolean IS_LINUX = System.getProperty("os.name").toLowerCase().contains("linux");
-    private final static AtomicInteger SUPPRESS = new AtomicInteger(0);
+    private final static AtomicInteger SUPPRESS_COUNT = new AtomicInteger(0);
     /**
      * Indicates if the chat screen is open, used to intercept the user's input event.
      *
@@ -39,39 +39,92 @@ public class Main implements ClientModInitializer {
      */
     public static boolean chatScrOpening = false;
     /**
-     * Decides if the user can pass input events to the game. <br/>
-     * Used to intercept duplicated input events. <br/>
+     * Decides if the user can pass input events to the game. <br>
+     * Used to intercept duplicated input events. <br>
      * <br/>
-     * The internal logic is: <br/>
-     * * First, the user opens the chat screen, here becomes false; <br/>
+     * The internal logic is: <br>
+     * * First, the user opens the chat screen, here becomes false; <br>
      * * Then, the user clicked on their keyboard, here becomes true.
+     *
+     * @see cn.xiaym.fcitx5.mixins.KeyboardMixin
+     * @see cn.xiaym.fcitx5.mixins.TextFieldWidgetMixin
      */
     public static boolean allowToType = false;
+
+    /**
+     * Indicates if we can find D-Bus connection related classes, used to avoid ClassNotDefError.
+     */
     public static boolean canFindDBus = false;
+    /**
+     * The initial state of the IME. Updates when returning to the playing screen.
+     *
+     * @see cn.xiaym.fcitx5.mixins.MinecraftClientMixin
+     */
     public static int initialState;
 
     public static boolean selectingElement = false;
+    public static Element selectedElement = null;
 
     //#if MC <= 12105
     //$$ public static boolean simulateDrawing = false;
     //$$ public static Set<Rect> simulatedRectSet = new HashSet<>();
     //#endif
 
+    public static String waylandPreedit = null;
+
+    private static ModContainer parentMod;
+
     public static void suppress() {
-        SUPPRESS.getAndIncrement();
+        SUPPRESS_COUNT.getAndIncrement();
     }
 
     public static void unsuppress() {
-        SUPPRESS.getAndDecrement();
+        SUPPRESS_COUNT.getAndDecrement();
     }
 
     public static boolean wasSuppressed() {
-        int i = SUPPRESS.get();
+        int i = SUPPRESS_COUNT.get();
         if (i < 0) {
-            SUPPRESS.set(0);
+            SUPPRESS_COUNT.set(0);
         }
 
         return i > 0;
+    }
+
+    public static Throwable tryLoadLibrary(String name) {
+        Path dataDir = FabricLoader.getInstance().getGameDir().resolve(".fcitx5-enhancer");
+        if (Files.notExists(dataDir)) {
+            try {
+                Files.createDirectory(dataDir);
+            } catch (IOException ex) {
+                Fcitx5.LOGGER.error("Failed to create data directory!");
+                throw new RuntimeException(ex);
+            }
+        }
+
+        Path nativeLib = dataDir.resolve(name);
+        try {
+            if (Files.exists(nativeLib)) {
+                Fcitx5.LOGGER.info("Found custom library {}, loading...", name);
+            } else {
+                Optional<Path> pathOptional = parentMod.findPath("native/" + name);
+                if (pathOptional.isEmpty()) {
+                    Fcitx5.LOGGER.error("Can't find built-in native library {} in Fcitx5-Enhancer's JAR!", name);
+                    Fcitx5.LOGGER.error("And we can't find your custom native library, the game WILL CRASH.");
+                    throw new IllegalStateException();
+                }
+
+                Fcitx5.LOGGER.info("Extracting and loading built-in library {}...", name);
+
+                nativeLib = dataDir.resolve("internal_" + name);
+                Files.copy(pathOptional.get(), nativeLib, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            System.load(nativeLib.toAbsolutePath().toString());
+            return null;
+        } catch (Throwable ex) {
+            return ex;
+        }
     }
 
     @Override
@@ -87,43 +140,15 @@ public class Main implements ClientModInitializer {
         }
 
         canFindDBus = true;
+        parentMod = parent.get();
 
-        Path dataDir = FabricLoader.getInstance().getGameDir().resolve(".fcitx5-enhancer");
-        if (Files.notExists(dataDir)) {
-            try {
-                Files.createDirectory(dataDir);
-            } catch (IOException ex) {
-                Fcitx5.LOGGER.error("Failed to create data directory!");
-                throw new RuntimeException(ex);
-            }
-        }
-
-        Path nativeLib = dataDir.resolve("native.so");
-        try {
-            if (Files.exists(nativeLib)) {
-                Fcitx5.LOGGER.info("Found .fcitx5-enhancer/native.so, loading...");
-            } else {
-                Optional<Path> pathOptional = parent.get().findPath("native/libfcitx5_detector.so");
-                if (pathOptional.isEmpty()) {
-                    Fcitx5.LOGGER.error("Can't find built-in native library in fcitx5-enhancer's JAR!");
-                    Fcitx5.LOGGER.error("And we can't find your custom native library, the game WILL CRASH.");
-                    throw new NullPointerException();
-                }
-
-                Fcitx5.LOGGER.info("Extracting and loading built-in native library...");
-                nativeLib = dataDir.resolve(".tmp_internal.so");
-
-                Files.copy(pathOptional.get(), nativeLib, StandardCopyOption.REPLACE_EXISTING);
-            }
-
-            System.load(nativeLib.toAbsolutePath().toString());
-            Fcitx5.LOGGER.info("Successfully loaded the native library.");
-        } catch (Exception ex) {
+        Throwable throwable = tryLoadLibrary("libfcitx5_detector.so");
+        if (throwable != null) {
             Fcitx5.LOGGER.error("Failed to load native library for Fcitx5-Enhancer!");
             Fcitx5.LOGGER.error("Please refer to the README at GitHub for more information:");
             Fcitx5.LOGGER.error(" -> https://github.com/NLR-DevTeam/Fcitx5-Enhancer");
 
-            throw new RuntimeException(ex);
+            throw new RuntimeException(throwable);
         }
 
         if (!Fcitx5.findWindow()) {

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(fcitx5_detector)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_FLAGS -O3 -DNDEBUG)
+set(CMAKE_CXX_FLAGS "-O3 -DNDEBUG")
 
 find_package(X11 REQUIRED)
 find_package(JNI REQUIRED)

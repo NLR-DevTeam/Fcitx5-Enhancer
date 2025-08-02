@@ -18,10 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Keyboard.class)
 public class KeyboardMixin {
     @Unique
-    private static final MinecraftClient INSTANCE = MinecraftClient.getInstance();
-
-    @Unique
-    private static final long HANDLE = INSTANCE.getWindow().getHandle();
+    private static final long HANDLE = MinecraftClient.getInstance().getWindow().getHandle();
 
     @Unique
     private static final int[] PREVENT_KEYS = {
@@ -46,11 +43,23 @@ public class KeyboardMixin {
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
     public void onKey(long window, int key, int scancode, int action, int modifiers, CallbackInfo ci) {
         Main.allowToType = true;
-        if (window != HANDLE || !keyShouldBeIntercepted(key)) {
+        if (window != HANDLE) {
             return;
         }
 
-        if (Fcitx5.userTyping()) {
+        if (Main.selectingElement) {
+            ci.cancel();
+            return;
+        }
+
+        if (keyShouldBeIntercepted(key) && Fcitx5.userTyping()) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "onChar", at = @At("HEAD"), cancellable = true)
+    public void onChar(long window, int codePoint, int modifiers, CallbackInfo ci) {
+        if (window == HANDLE && Main.selectingElement) {
             ci.cancel();
         }
     }

@@ -1,11 +1,14 @@
 package cn.xiaym.fcitx5.mixins;
 
 import cn.xiaym.fcitx5.Main;
+import cn.xiaym.fcitx5.config.ModConfig;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.render.GameRenderer;
+import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import net.minecraft.util.math.ColorHelper;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,22 +53,29 @@ public class GameRendererMixin {
         //$$ Main.simulateDrawing = false;
         //$$ original.call(instance, context, mouseX, mouseY, deltaTicks);
         //#endif
+        TextRenderer textRenderer = client.textRenderer;
+        if (Main.waylandPreedit != null && ModConfig.nativeWaylandOverlayEnabled) {
+            int width = textRenderer.getWidth(Main.waylandPreedit);
+            int x = ModConfig.nativeWaylandOverlayX, y = ModConfig.nativeWaylandOverlayY, padding = 3;
+
+            context.fill(x - padding, y - padding, x + width + padding, y + 10 + padding, Colors.WHITE);
+            context.drawText(textRenderer, Main.waylandPreedit, x, y, Colors.BLACK, false);
+        }
+
         if (!Main.selectingElement || client.currentScreen == null) {
             return;
         }
 
         Optional<Element> elementOpt = client.currentScreen.hoveredElement(mouseX, mouseY);
-        if (elementOpt.isEmpty()) {
+        Element element;
+        if (elementOpt.isEmpty() || !((Main.selectedElement = element = elementOpt.get()) instanceof Drawable drawable)) {
+            Main.selectedElement = null;
+            context.drawText(textRenderer, Text.translatable("fcitx5.selector.none"), 10, 10, Colors.WHITE, true);
             return;
         }
 
-        Element element = elementOpt.get();
-        if (!(element instanceof Drawable drawable)) {
-            return;
-        }
-
-        context.drawText(MinecraftClient.getInstance().textRenderer, "Selecting: " + drawable.getClass()
-                .getName(), 10, 10, Colors.WHITE, true);
+        context.drawText(textRenderer, Text.translatable("fcitx5.selector.selecting", element.getClass()
+                .getSimpleName()), 10, 10, Colors.WHITE, true);
 
         //#if MC > 12105
         GuiRenderState state = new GuiRenderState();

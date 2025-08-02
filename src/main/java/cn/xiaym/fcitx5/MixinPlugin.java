@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * This MixinConfigPlugin intercepts mixins' loading on Windows.
+ * This MixinConfigPlugin intercepts mixins' loading on non-Linux platforms.
  */
 public class MixinPlugin implements IMixinConfigPlugin {
     @Override

@@ -87,3 +87,16 @@ jar {
         rename { "${it}_${project.archivesBaseName}" }
     }
 }
+
+loom {
+    runs {
+        clientWayland {
+            // Use system-wide glfw for Native Wayland
+            property("org.lwjgl.glfw.libname", "/usr/lib/libglfw.so")
+
+            client()
+        }
+
+        remove server
+    }
+}

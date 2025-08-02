@@ -12,6 +12,7 @@
     "GameRendererMixin",
     "KeyboardMixin",
     "MinecraftClientMixin",
+    "MouseMixin",
     "TextFieldWidgetMixin",
     "WindowMixin"
   ]

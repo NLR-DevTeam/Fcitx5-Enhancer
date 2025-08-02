@@ -7,10 +7,21 @@
   "fcitx5.config.general.imBlockerEnabled.tooltip": "Indicates if we should automatically deactivate & activate your IME according to your config, working like IMBlocker mod but with better performance.",
   "fcitx5.config.general.restoreInitialState.title": "Restore IME State on Losing Focus",
   "fcitx5.config.general.restoreInitialState.tooltip": "Automatically restores the initial input state of your IME when Minecraft window gets minimized or unfocused.\n\n* If you have \"Share Input State\" enabled, please turn this option on.",
+  "fcitx5.config.general.selectElement.title": "Element Selection Key",
+  "fcitx5.config.general.selectElement.tooltip": "If this key is pressed, we'll begin the element / screen selection guide, which makes adding user rules simpler.",
   "fcitx5.config.category.builtinRules": "Built-In Rules",
   "fcitx5.config.builtinRules.subCategory.commandInput": "Command Input",
   "fcitx5.config.builtinRules.commandInput.directInput.title": "Suppress on Direct Input",
   "fcitx5.config.builtinRules.commandInput.directInput.tooltip": "Indicates if we should prevent your IME from activating when directly typing commands.\n\nIncluding:\n - Clicking on key \"%s\"\n - Clicking on signs which have message components that suggests command",
   "fcitx5.config.builtinRules.commandInput.later.title": "Deactivate on Typing Later",
-  "fcitx5.config.builtinRules.commandInput.later.tooltip": "Indicates if we should deactivate your IME when typing a \"/\" in the input widget.\n\nIncluding:\n - Open chat HUD firstly and then type a \"/\"\n - Clicking on messages that have components that suggests command"
+  "fcitx5.config.builtinRules.commandInput.later.tooltip": "Indicates if we should deactivate your IME when typing a \"/\" in the input widget.\n\nIncluding:\n - Open chat HUD firstly and then type a \"/\"\n - Clicking on messages that have components that suggests command",
+  "fcitx5.config.category.nativeWayland": "Native Wayland",
+  "fcitx5.config.nativeWayland.preeditEnabled.title": "Enable Preedit Overlay",
+  "fcitx5.config.nativeWayland.preeditEnabled.description": "Indicates if we should show an overlay displaying your preedit text when you're typing.",
+  "fcitx5.config.nativeWayland.preeditX.title": "Preedit Overlay X Position",
+  "fcitx5.config.nativeWayland.preeditX.description": "Indicates the X (horizonal) position of the overlay.",
+  "fcitx5.config.nativeWayland.preeditY.title": "Preedit Overlay Y Position",
+  "fcitx5.config.nativeWayland.preeditY.description": "Indicates the Y (vertical) position of the overlay.",
+  "fcitx5.selector.none": "Left-click on an element to select it, or right-click to select the whole screen. Press ESC to cancel.",
+  "fcitx5.selector.selecting": "Selecting Element: %s"
 }
