@@ -2,11 +2,14 @@ package cn.xiaym.fcitx5.mixins;
 
 import cn.xiaym.fcitx5.Main;
 import cn.xiaym.fcitx5.config.ModConfig;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
@@ -19,23 +22,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import java.util.*;
 
 //#if MC > 12105
-import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.render.state.GuiRenderState;
-import net.minecraft.client.render.RenderTickCounter;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //#else
 //$$ import cn.xiaym.fcitx5.compat.legacy.Rect;
-//$$ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-//$$ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 //#if MC >= 12105
 //$$ import net.minecraft.client.util.BufferAllocator;
 //#else
 //$$ import net.minecraft.client.render.BufferBuilder;
 //#endif
 //$$ import net.minecraft.client.render.VertexConsumerProvider;
-//$$ import net.minecraft.client.gui.screen.Screen;
 //#endif
 
 @Mixin(GameRenderer.class)
@@ -45,8 +41,9 @@ public class GameRendererMixin {
     private MinecraftClient client;
 
     //#if MC > 12105
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;renderWithTooltip(Lnet/minecraft/client/gui/DrawContext;IIF)V", shift = At.Shift.AFTER))
-    public void onRender(RenderTickCounter tickCounter, boolean tick, CallbackInfo ci, @Local DrawContext context, @Local(name = "i") int mouseX, @Local(name = "j") int mouseY) {
+    @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;renderWithTooltip(Lnet/minecraft/client/gui/DrawContext;IIF)V"))
+    public void wrapRender(Screen instance, DrawContext context, int mouseX, int mouseY, float deltaTicks, Operation<Void> original) {
+        original.call(instance,  context,  mouseX, mouseY, deltaTicks);
         //#else
         //$$ @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;renderWithTooltip(Lnet/minecraft/client/gui/DrawContext;IIF)V"))
         //$$ public void wrapRender(Screen instance, DrawContext context, int mouseX, int mouseY, float deltaTicks, Operation<Void> original) {
@@ -80,7 +77,7 @@ public class GameRendererMixin {
         //#if MC > 12105
         GuiRenderState state = new GuiRenderState();
         DrawContext vContext = new DrawContext(MinecraftClient.getInstance(), state);
-        drawable.render(vContext, mouseX, mouseY, tickCounter.getDynamicDeltaTicks());
+        drawable.render(vContext, mouseX, mouseY, deltaTicks);
 
         // Collect Elements
         List<ScreenRect> rectList = new ArrayList<>();
