@@ -139,6 +139,8 @@ public class ModConfig {
                 .setSaveConsumer(newValue -> builtinCommandDisableLater = newValue)
                 .build());
 
+        builtinRulesCategory.addEntry(commandInputSubCategory.build());
+
         builder.getOrCreateCategory(Text.translatable("fcitx5.config.category.nativeWayland"))
                 .addEntry(entryBuilder
                         .startBooleanToggle(Text.translatable("fcitx5.config.nativeWayland.preeditEnabled.title"), nativeWaylandOverlayEnabled)
@@ -158,8 +160,6 @@ public class ModConfig {
                         .setDefaultValue(10)
                         .setSaveConsumer(newValue -> nativeWaylandOverlayY = newValue)
                         .build());
-
-        builtinRulesCategory.addEntry(commandInputSubCategory.build());
 
         return builder.build();
     }

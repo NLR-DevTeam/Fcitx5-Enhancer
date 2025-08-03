@@ -5,13 +5,13 @@ import cn.xiaym.fcitx5.Fcitx5Wayland;
 import cn.xiaym.fcitx5.Main;
 import cn.xiaym.fcitx5.config.ModConfig;
 import cn.xiaym.fcitx5.dbus.Fcitx5DBus;
+import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.Window;
-import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWNativeWayland;
 import org.spongepowered.asm.mixin.Final;
@@ -29,8 +29,8 @@ public class MinecraftClientMixin {
     @Unique
     private static boolean isWayland = false;
     @Shadow
-    @Nullable
-    public Screen currentScreen;
+    @Final
+    public Keyboard keyboard;
     @Shadow
     @Final
     private Window window;
@@ -85,12 +85,9 @@ public class MinecraftClientMixin {
 
             Fcitx5Wayland.initialize(GLFWNativeWayland.glfwGetWaylandDisplay());
             Fcitx5Wayland.onCommitString = text -> {
-                if (currentScreen == null) {
-                    return;
-                }
-
-                for (char c : text.toCharArray()) {
-                    currentScreen.charTyped(c, 0);
+                long handle = window.getHandle();
+                for (int i = 0, len = text.length(); i < len; i++) {
+                    ((KeyboardInvoker) keyboard).invokeOnChar(handle, Character.codePointAt(text, i), 0);
                 }
             };
 
