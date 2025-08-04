@@ -12,7 +12,7 @@ public class IncompatibleNoticeScreen extends Screen {
 
     public IncompatibleNoticeScreen(Screen parent) {
         super(Text.translatable("fcitx5.screen.incompatibleNotice.title"));
-        parentScreen = parent;
+        this.parentScreen = parent;
     }
 
     @Override

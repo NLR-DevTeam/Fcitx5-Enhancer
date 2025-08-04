@@ -3,6 +3,8 @@ package cn.xiaym.fcitx5.mixins;
 import cn.xiaym.fcitx5.Main;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
+import net.minecraft.client.toast.SystemToast;
+import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,6 +21,8 @@ public class MouseMixin {
     private static final MinecraftClient CLIENT = MinecraftClient.getInstance();
     @Unique
     private static final long HANDLE = CLIENT.getWindow().getHandle();
+    @Unique
+    private static final SystemToast.Type TOAST_TYPE = new SystemToast.Type(3000);
 
     @Inject(method = "onMouseButton", at = @At("HEAD"), cancellable = true)
     public void onMouseButton(long window, int button, int action, int mods, CallbackInfo ci) {
@@ -28,18 +32,20 @@ public class MouseMixin {
 
         ci.cancel();
 
+        // TODO implement selection
+
         switch (button) {
             case GLFW.GLFW_MOUSE_BUTTON_LEFT -> {
                 if (Main.selectedElement == null) {
                     break;
                 }
 
-                System.out.println("Selecting element: " + Main.selectedElement);
+                SystemToast.add(CLIENT.getToastManager(), TOAST_TYPE, Text.literal("Selected Element"), Text.literal(Main.selectedElement.getClass().getSimpleName()));
             }
 
             case  GLFW.GLFW_MOUSE_BUTTON_RIGHT -> {
                 assert CLIENT.currentScreen != null;
-                System.out.println("Selecting screen: " + CLIENT.currentScreen);
+                SystemToast.add(CLIENT.getToastManager(), TOAST_TYPE, Text.literal("Selected Screen"), Text.literal(CLIENT.currentScreen.getClass().getSimpleName()));
             }
 
             default -> {

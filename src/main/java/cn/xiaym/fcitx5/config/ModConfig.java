@@ -1,6 +1,8 @@
 package cn.xiaym.fcitx5.config;
 
 import cn.xiaym.fcitx5.Fcitx5;
+import cn.xiaym.fcitx5.config.rules.ElementRule;
+import cn.xiaym.fcitx5.config.rules.ScreenRule;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -17,6 +19,8 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ModConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -26,6 +30,8 @@ public class ModConfig {
     public static ModifierKeyCode selectElementKey = ModifierKeyCode.of(InputUtil.Type.KEYSYM.createFromCode(GLFW.GLFW_KEY_S), Modifier.of(false, true, true));
     public static boolean builtinCommandSuppressDirect = true;
     public static boolean builtinCommandDisableLater = true;
+    public static List<ElementRule> userElementRules = new ArrayList<>();
+    public static List<ScreenRule> userScreenRules = new ArrayList<>();
     public static boolean nativeWaylandOverlayEnabled = true;
     public static int nativeWaylandOverlayX = 10;
     public static int nativeWaylandOverlayY = 10;
@@ -125,6 +131,7 @@ public class ModConfig {
                         .setModifierSaveConsumer(newValue -> selectElementKey = newValue)
                         .build());
 
+        // Built-in rules start
         ConfigCategory builtinRulesCategory = builder.getOrCreateCategory(Text.translatable("fcitx5.config.category.builtinRules"));
         SubCategoryBuilder commandInputSubCategory = entryBuilder.startSubCategory(Text.translatable("fcitx5.config.builtinRules.subCategory.commandInput"))
                 .setExpanded(true);
@@ -140,6 +147,11 @@ public class ModConfig {
                 .build());
 
         builtinRulesCategory.addEntry(commandInputSubCategory.build());
+        // Built-in rules end
+
+        builder.getOrCreateCategory(Text.translatable("fcitx5.config.category.userRules"))
+                .addEntry(new UserRuleListSqrEntry<>(Text.translatable("fcitx5.config.userRules.subCategory.elementRules"), userElementRules, true, newValue -> userElementRules = newValue))
+                .addEntry(new UserRuleListSqrEntry<>(Text.translatable("fcitx5.config.userRules.subCategory.screenRules"), userScreenRules, true, newValue -> userScreenRules = newValue));
 
         builder.getOrCreateCategory(Text.translatable("fcitx5.config.category.nativeWayland"))
                 .addEntry(entryBuilder
