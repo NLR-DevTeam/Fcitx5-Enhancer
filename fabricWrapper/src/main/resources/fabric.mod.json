@@ -21,7 +21,8 @@
     ]
   },
   "depends": {
-    "minecraft": ${minecraft_dependency}
+    "minecraft": ${minecraft_dependency},
+    "cloth-config": "*"
   },
   "custom": {
     "modmenu:clientsideOnly": true

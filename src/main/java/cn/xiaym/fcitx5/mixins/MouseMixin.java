@@ -118,9 +118,11 @@ public class MouseMixin {
         //$$ private static boolean onMouseClickedElement(Screen instance, double d, double e, int i, Operation<Boolean> original) {
         //$$ MinecraftClient client = MinecraftClient.getInstance();
         //#endif
-        original.call(instance, d, e, i);
+        boolean originalResult = original.call(instance, d, e, i);
+        if (client.currentScreen == null) {
+            return originalResult;
+        }
 
-        assert client.currentScreen != null;
         boolean ruleFound;
         boolean shouldBlock;
 
