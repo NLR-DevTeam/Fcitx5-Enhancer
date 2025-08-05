@@ -2,9 +2,6 @@ package cn.xiaym.fcitx5.dbus;
 
 import cn.xiaym.fcitx5.Fcitx5;
 import cn.xiaym.fcitx5.async.AsyncDispatcher;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
 import org.freedesktop.dbus.connections.IDisconnectCallback;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;
@@ -25,10 +22,6 @@ public class Fcitx5DBus {
     private static Fcitx5Controller1 controller;
 
     static {
-        // DON'T SPAM!
-        LoggerContext context = (LoggerContext) LogManager.getContext(false);
-        context.getConfiguration().getLoggerConfig("org.freedesktop.dbus").setLevel(Level.OFF);
-
         tryInit();
     }
 
