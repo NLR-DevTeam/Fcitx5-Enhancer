@@ -26,7 +26,7 @@ import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.render.state.GuiRenderState;
 //#else
 //$$ import cn.xiaym.fcitx5.compat.legacy.Rect;
-//#if MC >= 12105
+//#if MC >= 12101
 //$$ import net.minecraft.client.util.BufferAllocator;
 //#else
 //$$ import net.minecraft.client.render.BufferBuilder;
@@ -98,7 +98,7 @@ public class GameRendererMixin {
         //#else
         //$$ // Let DrawContextMixin take over this, then we'll receive `Rect`s
         //$$ Main.simulateDrawing = true;
-        //#if MC >= 12105
+        //#if MC >= 12101
         //$$ DrawContext vContext = new DrawContext(client, VertexConsumerProvider.immediate(new BufferAllocator(786432)));
         //#else
         //$$ DrawContext vContext = new DrawContext(client, VertexConsumerProvider.immediate(new BufferBuilder(786432)));
@@ -110,7 +110,7 @@ public class GameRendererMixin {
         //$$ while (it.hasNext()) {
         //$$     Rect rect = it.next();
         //$$     context.fill(rect.x1(), rect.y1(), rect.x2(), rect.y2(),
-        //#if MC >= 12105
+        //#if MC >= 12104
         //$$         ColorHelper.getArgb(50, 0, 0, 255)
         //#else
         //$$         ColorHelper.Argb.getArgb(50, 0, 0, 255)

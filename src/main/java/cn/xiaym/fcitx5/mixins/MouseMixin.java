@@ -110,7 +110,7 @@ public class MouseMixin {
         Main.selectingElement = false;
     }
 
-    //#if MC > 12006
+    //#if MC > 12101
     @WrapOperation(method = "onMouseButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseClicked(DDI)Z"))
     public boolean onMouseClickedElement(Screen instance, double d, double e, int i, Operation<Boolean> original) {
         //#else

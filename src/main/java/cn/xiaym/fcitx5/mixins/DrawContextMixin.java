@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
 //$$ import org.spongepowered.asm.mixin.injection.Inject;
 //$$ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //$$ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-//#if MC >= 12105
+//#if MC >= 12101
 //$$ import java.util.function.Function;
 //#endif
 //#endif
@@ -58,7 +58,7 @@ public class DrawContextMixin {
     //$$     }
     //$$ }
     //$$
-    //#if MC < 12105
+    //#if MC < 12104
     //$$ @Inject(method = "drawTexturedQuad(Lnet/minecraft/util/Identifier;IIIIIFFFF)V", at = @At("HEAD"), cancellable = true)
     //$$ public void onDrawTexturedQuad1(Identifier texture, int x1, int x2, int y1, int y2, int z, float u1, float u2, float v1, float v2, CallbackInfo ci) {
     //$$     if (Main.simulateDrawing) {
@@ -76,7 +76,7 @@ public class DrawContextMixin {
     //$$ }
     //#else
     //$$ @Inject(method = "drawTexturedQuad(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIIIFFFFI)V", at = @At("HEAD"), cancellable = true)
-    //$$ public void onDrawTexturedQuad_12105(Function<Identifier, RenderLayer> renderLayers, Identifier sprite, int x1, int x2, int y1, int y2, float u1, float u2, float v1, float v2, int color, CallbackInfo ci) {
+    //$$ public void onDrawTexturedQuad_12104(Function<Identifier, RenderLayer> renderLayers, Identifier sprite, int x1, int x2, int y1, int y2, float u1, float u2, float v1, float v2, int color, CallbackInfo ci) {
     //$$     if (Main.simulateDrawing) {
     //$$         Main.simulatedRectSet.add(new Rect(x1, y1, x2, y2));
     //$$         ci.cancel();
