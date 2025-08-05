@@ -5,6 +5,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 
@@ -25,21 +26,28 @@ public class ElementRuleEditScreen extends Screen {
     }
 
     public static Text getYesOrNoText(boolean b) {
-        return Text.translatable("fcitx5.controls." + b).withColor(b ? 0xFF00FF00 /* GREEN */ : Colors.LIGHT_RED);
+        MutableText text = Text.translatable("fcitx5.controls." + b);
+        return text.setStyle(text.getStyle().withColor(b ? 0xFF00FF00 /* GREEN */ : 0xFFDF505 /* LIGHT_RED */));
     }
 
     public static ButtonWidget createRemoveButton(int x, int y, Runnable callback) {
         boolean[] confirmed = { false };
-        return ButtonWidget.builder(Text.translatable("fcitx5.controls.remove")
-                .withColor(Colors.LIGHT_RED), button -> {
+        MutableText message = Text.translatable("fcitx5.controls.remove");
+        return ButtonWidget.builder(message.setStyle(message.getStyle()
+                .withColor(0xFFDF5050 /* LIGHT_RED */)), button -> {
             if (!confirmed[0]) {
-                button.setMessage(Text.translatable("fcitx5.controls.remove.confirm").withColor(Colors.RED));
+                MutableText confirm = Text.translatable("fcitx5.controls.remove.confirm");
+                button.setMessage(confirm.setStyle(confirm.getStyle().withColor(Colors.RED)));
                 confirmed[0] = true;
                 return;
             }
 
             callback.run();
         }).width(98).position(x, y).build();
+    }
+
+    public static String nullSafe(String str) {
+        return str == null ? "-" : str;
     }
 
     @Override
@@ -49,11 +57,14 @@ public class ElementRuleEditScreen extends Screen {
         TextFieldWidget commentField = addDrawableChild(new TextFieldWidget(textRenderer, centerX - 10, 40, 150, 20, null));
         TextFieldWidget screenClassField = addDrawableChild(new TextFieldWidget(textRenderer, centerX - 10, 70, 150, 20, null));
         TextFieldWidget elementClassField = addDrawableChild(new TextFieldWidget(textRenderer, centerX - 10, 100, 150, 20, null));
-        commentField.setText(elementRule.comment);
-        screenClassField.setText(elementRule.screenClassName);
-        elementClassField.setText(elementRule.elementClassName);
+        commentField.setMaxLength(65535);
+        screenClassField.setMaxLength(65535);
+        elementClassField.setMaxLength(65535);
+        commentField.setText(elementRule.comment() == null ? "" : elementRule.comment());
+        screenClassField.setText(nullSafe(elementRule.screenClassName()));
+        elementClassField.setText(nullSafe(elementRule.elementClassName()));
 
-        boolean[] shouldBlock = { elementRule.shouldBlock };
+        boolean[] shouldBlock = { elementRule.shouldBlock() };
         addDrawableChild(ButtonWidget.builder(getYesOrNoText(shouldBlock[0]), button -> {
             shouldBlock[0] = !shouldBlock[0];
             button.setMessage(getYesOrNoText(shouldBlock[0]));
@@ -70,11 +81,15 @@ public class ElementRuleEditScreen extends Screen {
         addDrawableChild(createRemoveButton(centerX + 50, height - 30, () -> {
             removeCallback.run();
             close();
-        }));
+        })).active = elementRule.comment() != null /* Disable if is newly created */;
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+        //#if MC <= 12000
+        //$$ this.renderBackground(context);
+        //#endif
+
         super.render(context, mouseX, mouseY, deltaTicks);
         int centerX = width / 2;
 

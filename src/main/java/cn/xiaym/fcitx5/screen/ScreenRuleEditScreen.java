@@ -10,8 +10,7 @@ import net.minecraft.util.Colors;
 
 import java.util.function.Consumer;
 
-import static cn.xiaym.fcitx5.screen.ElementRuleEditScreen.createRemoveButton;
-import static cn.xiaym.fcitx5.screen.ElementRuleEditScreen.getYesOrNoText;
+import static cn.xiaym.fcitx5.screen.ElementRuleEditScreen.*;
 
 public class ScreenRuleEditScreen extends Screen {
     private final Screen parentScreen;
@@ -33,14 +32,19 @@ public class ScreenRuleEditScreen extends Screen {
 
         TextFieldWidget commentField = addDrawableChild(new TextFieldWidget(textRenderer, centerX - 10, 40, 150, 20, null));
         TextFieldWidget screenClassField = addDrawableChild(new TextFieldWidget(textRenderer, centerX - 10, 70, 150, 20, null));
-        commentField.setText(screenRule.comment);
-        screenClassField.setText(screenRule.screenClassName);
+        commentField.setMaxLength(65535);
+        screenClassField.setMaxLength(65535);
+        commentField.setText(screenRule.comment() == null ? "" : screenRule.comment());
+        screenClassField.setText(nullSafe(screenRule.screenClassName()));
 
-        boolean[] shouldBlock = { screenRule.shouldBlock };
+        boolean[] shouldBlock = { screenRule.shouldBlock() };
         addDrawableChild(ButtonWidget.builder(getYesOrNoText(shouldBlock[0]), button -> {
             shouldBlock[0] = !shouldBlock[0];
             button.setMessage(getYesOrNoText(shouldBlock[0]));
         }).dimensions(centerX - 10, 100, 150, 20).build());
+
+        addDrawableChild(ButtonWidget.builder(Text.translatable("gui.cancel"), button -> close()).width(98)
+                .position(centerX - 150, height - 30).build());
 
         addDrawableChild(ButtonWidget.builder(Text.translatable("gui.done"), button -> {
             saveCallback.accept(new ScreenRule(commentField.getText(), screenClassField.getText(), shouldBlock[0]));
@@ -50,11 +54,15 @@ public class ScreenRuleEditScreen extends Screen {
         addDrawableChild(createRemoveButton(centerX + 50, height - 30, () -> {
             removeCallback.run();
             close();
-        }));
+        })).active = screenRule.comment() != null /* Disable if is newly created */;
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+        //#if MC <= 12000
+        //$$ this.renderBackground(context);
+        //#endif
+
         super.render(context, mouseX, mouseY, deltaTicks);
         int centerX = width / 2;
 

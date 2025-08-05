@@ -1,5 +1,6 @@
 package cn.xiaym.fcitx5;
 
+import cn.xiaym.fcitx5.dbus.Fcitx5DBus;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -61,6 +62,7 @@ public class Main implements ClientModInitializer {
      * @see cn.xiaym.fcitx5.mixins.MinecraftClientMixin
      */
     public static int initialState;
+    public static boolean screenSuppressed = false;
 
     public static boolean selectingElement = false;
     public static Element selectedElement = null;
@@ -141,6 +143,7 @@ public class Main implements ClientModInitializer {
 
         canFindDBus = true;
         parentMod = parent.get();
+        Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> initialState = it);
 
         Throwable throwable = tryLoadLibrary("libfcitx5_detector.so");
         if (throwable != null) {

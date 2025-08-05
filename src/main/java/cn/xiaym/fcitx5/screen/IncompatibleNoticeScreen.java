@@ -23,6 +23,10 @@ public class IncompatibleNoticeScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+        //#if MC <= 12000
+        //$$ this.renderBackground(context);
+        //#endif
+
         super.render(context, mouseX, mouseY, deltaTicks);
 
         int centerX = width / 2;

@@ -1,23 +1,30 @@
 # Fcitx5-Enhancer
 
-This is a mod made for Minecraft, which provides compatibility with Fcitx5.
+This is a mod made for Minecraft 1.20.x & 1.21.x, which provides compatibility with Fcitx5.
 
-## Why?
+## The Problem
 
-When typing using fcitx5 in Minecraft, and when the hotkeys that the IME uses (e.g. Backspace, Tab, Enter) are pressed,
-the IME processes the key, and at the same time, Minecraft processes the key too.
+When using IME in Minecraft, pressing a key that is also a game hotkey (e.g. Tab, Enter) causes the key event to be
+handled by both the input method and the game.
 
-And then you'll be interrupted. That's crazy. So I wrote this mod, in order to deal with this annoying problem.
+And then you'll be interrupted. That's crazy. So I wrote this mod, in order to deal with this disrupting problem.
 
----
+## Extra Features
 
-We provides a highly configurable IMBlocker. (Mod Menu & Cloth Config are required to open the config screen.)
+We provides a highly configurable IMBlocker, with a visual element selector.
 
 Besides, we added IME support for native Wayland environment.
 
+## Requirements
+
+Fabric Loader is required to run this mod.
+
+[Cloth Config](https://modrinth.com/mod/cloth-config) is required. To access the config screen, you need
+to install [Mod Menu](https://modrinth.com/mod/modmenu) as well.
+
 ## Building this Mod
 
-Simply run this in your terminal:
+To build the mod from its source code, run the following commands:
 
 ```shell
 git clone https://github.com/NLR-DevTeam/Fcitx5-Enhancer --depth 1 --recursive
@@ -29,13 +36,13 @@ Then you'll find the artifacts inside `fabricWrapper/build/libs`.
 
 ## Notice
 
-This mod uses [native libraries](/src/native) to implement its functionalities.
-And the built-in libraries is compiled for Linux x86_64 (glibc 2.31, from Debian 11).  
-if your system is incompatible with it, please compile one yourself as follows.
+This mod relies on [native libraries](/src/native) to implement its functionalities.
+And the built-in libraries were compiled for Linux x86_64 (glibc 2.31, from Debian 11).  
+If you are using a different architecture (e.g. aarch64) or an incompatible system, you must compile them yourself.
 
 ## Compiling the Native Libraries
 
-### Base
+### Base Library (`libfcitx5_detector.so`)
 
 Requirements:
 
@@ -54,14 +61,13 @@ make
 Eventually you'll see a shared library file named `libfcitx5_detector.so` inside the `build` folder.  
 Then, place it into folder `.minecraft/.fcitx5-enhancer`.
 
-### Wayland Support (Optional)
+### Wayland Support (`libwayland_support.so`) (Optional)
 
 Requirements:
 
-- A valid JDK installation (with JNI headers)
+- All prerequisites from the base library
 - Wayland Protocols (`libwayland-dev wayland-protocols` for Debian)
 - PkgConfig Tool (`pkg-config` for Debian)
-- CMake 3.10+
 
 Run this in your terminal:
 

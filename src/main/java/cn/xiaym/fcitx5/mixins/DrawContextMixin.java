@@ -15,7 +15,9 @@ import org.spongepowered.asm.mixin.Mixin;
 //$$ import org.spongepowered.asm.mixin.injection.Inject;
 //$$ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //$$ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+//#if MC >= 12105
 //$$ import java.util.function.Function;
+//#endif
 //#endif
 
 @Mixin(DrawContext.class)

@@ -26,6 +26,14 @@
   "fcitx5.config.builtinRules.commandInput.directInput.tooltip": "指定在直接输入命令时，是否应该阻止输入法开启。\n\n包括：\n - 点击“%s”键\n - 点击带有命令建议消息组件的告示牌",
   "fcitx5.config.builtinRules.commandInput.later.title": "在后续输入时禁用输入法",
   "fcitx5.config.builtinRules.commandInput.later.tooltip": "指定在输入框组件中输入“/”时，输入法是否应该被禁用。\n\n包括：\n - 先打开聊天栏，后输入一个“/”\n - 点击带有命令建议组件的消息",
+  "fcitx5.config.builtinRules.inventory.inventory.title": "打开物品栏屏幕时禁用输入法",
+  "fcitx5.config.builtinRules.inventory.inventory.tooltip": "包括：\n - 生存物品栏\n - 创造物品栏",
+  "fcitx5.config.builtinRules.inventory.creativeSearch.title": "选中创造物品栏搜索框时禁用输入法",
+  "fcitx5.config.builtinRules.interactable.blocks.title": "打开可互动方块的屏幕时禁用输入法",
+  "fcitx5.config.builtinRules.interactable.blocks.tooltip": "包括：\n - 工作台、切石机等\n - 命令方块、结构方块等",
+  "fcitx5.config.builtinRules.interactable.items.title": "打开可互动物品的屏幕时禁用输入法",
+  "fcitx5.config.builtinRules.interactable.items.tooltip": "包括：\n - 成书",
+  "fcitx5.config.builtinRules.interactable.anvilRename.title": "选中铁砧重命名框时禁用输入法",
   "fcitx5.config.category.userRules": "用户规则",
   "fcitx5.config.userRules.subCategory.elementRules": "自定义元素规则",
   "fcitx5.config.userRules.subCategory.screenRules": "自定义屏幕规则",
@@ -37,5 +45,8 @@
   "fcitx5.config.nativeWayland.preeditY.title": "预编辑预览覆盖层垂直位置",
   "fcitx5.config.nativeWayland.preeditY.description": "指定预编辑预览覆盖层的垂直（Y）位置。",
   "fcitx5.selector.none": "左键一个元素以选择，右键选择整个屏幕，或按 ESC 键取消。",
-  "fcitx5.selector.selecting": "正在选择元素: %s"
+  "fcitx5.selector.selecting": "正在选择元素: %s",
+  "fcitx5.selector.completed": "选择完毕",
+  "fcitx5.selector.new": "正在创建新规则",
+  "fcitx5.selector.existing": "正在编辑已有规则"
 }

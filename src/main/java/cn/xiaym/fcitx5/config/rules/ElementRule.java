@@ -1,15 +1,11 @@
 package cn.xiaym.fcitx5.config.rules;
 
-public class ElementRule {
-    public String comment;
-    public String screenClassName;
-    public String elementClassName;
-    public boolean shouldBlock;
+public record ElementRule(String comment, String screenClassName, String elementClassName, boolean shouldBlock) {
+    public static ElementRule create(Class<?> screenClass, Class<?> elementClass, boolean shouldBlock) {
+        return new ElementRule(null, screenClass.getName(), elementClass.getName(), shouldBlock);
+    }
 
-    public ElementRule(String comment, String screenClassName, String elementClassName, boolean shouldBlock) {
-        this.comment = comment;
-        this.screenClassName = screenClassName;
-        this.elementClassName = elementClassName;
-        this.shouldBlock = shouldBlock;
+    public ElementRule modifyShouldBlock(boolean newValue) {
+        return new ElementRule(comment, screenClassName, elementClassName, newValue);
     }
 }

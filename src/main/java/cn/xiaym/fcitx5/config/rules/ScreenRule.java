@@ -1,13 +1,11 @@
 package cn.xiaym.fcitx5.config.rules;
 
-public class ScreenRule {
-    public String comment;
-    public String screenClassName;
-    public boolean shouldBlock;
+public record ScreenRule(String comment, String screenClassName, boolean shouldBlock) {
+    public static ScreenRule create(Class<?> clazz, boolean shouldBlock) {
+        return new ScreenRule(null, clazz.getName(), shouldBlock);
+    }
 
-    public ScreenRule(String comment, String screenClassName,  boolean shouldBlock) {
-        this.comment = comment;
-        this.screenClassName = screenClassName;
-        this.shouldBlock = shouldBlock;
+    public ScreenRule modifyShouldBlock(boolean newValue) {
+        return new ScreenRule(comment, screenClassName, newValue);
     }
 }

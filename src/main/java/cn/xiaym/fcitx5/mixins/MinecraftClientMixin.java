@@ -3,6 +3,7 @@ package cn.xiaym.fcitx5.mixins;
 import cn.xiaym.fcitx5.Fcitx5;
 import cn.xiaym.fcitx5.Fcitx5Wayland;
 import cn.xiaym.fcitx5.Main;
+import cn.xiaym.fcitx5.config.BuiltinRuleSet;
 import cn.xiaym.fcitx5.config.ModConfig;
 import cn.xiaym.fcitx5.dbus.Fcitx5DBus;
 import net.minecraft.client.Keyboard;
@@ -12,6 +13,7 @@ import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.Window;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWNativeWayland;
 import org.spongepowered.asm.mixin.Final;
@@ -31,6 +33,9 @@ public class MinecraftClientMixin {
     @Shadow
     @Final
     public Keyboard keyboard;
+    @Shadow
+    @Nullable
+    public Screen currentScreen;
     @Shadow
     @Final
     private Window window;
@@ -54,8 +59,11 @@ public class MinecraftClientMixin {
             }
 
             Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> {
-                Main.initialState = it;
+                if (!Main.screenSuppressed) {
+                    Main.initialState = it;
+                }
 
+                Main.screenSuppressed = false;
                 if (it != Fcitx5DBus.STATE_INACTIVE) {
                     Fcitx5DBus.deactivate();
                 }
@@ -67,6 +75,19 @@ public class MinecraftClientMixin {
         afterInGame = false;
 
         Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> {
+            String screenClass = screen.getClass().getName();
+            if (ModConfig.screenRuleShouldBlock(screenClass) || BuiltinRuleSet.screenRuleShouldBlock(screenClass)) {
+                Main.screenSuppressed = true;
+
+                if (it == Fcitx5DBus.STATE_ACTIVE) {
+                    Main.initialState = it;
+                    Fcitx5DBus.deactivate();
+                }
+
+                return;
+            }
+
+            Main.screenSuppressed = false;
             if (Main.initialState == Fcitx5DBus.STATE_ACTIVE && it != Fcitx5DBus.STATE_ACTIVE && !Main.wasSuppressed()) {
                 Fcitx5DBus.activate();
             }
@@ -128,7 +149,7 @@ public class MinecraftClientMixin {
     @Inject(method = "tick", at = @At("TAIL"))
     public void onTickEnd(CallbackInfo ci) {
         if (!Main.selectingElement) {
-            if (ModConfig.selectElementKey.matchesCurrentKey()) {
+            if (ModConfig.selectElementKey.matchesCurrentKey() && currentScreen != null) {
                 Main.selectingElement = true;
             }
         } else {

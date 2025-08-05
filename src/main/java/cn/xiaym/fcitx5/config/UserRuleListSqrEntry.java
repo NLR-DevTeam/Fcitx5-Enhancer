@@ -12,21 +12,21 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @SuppressWarnings("UnstableApiUsage")
 public class UserRuleListSqrEntry<T> extends AbstractListListEntry<T, UserRuleListSqrEntry.UserRuleCeil<T>, UserRuleListSqrEntry<T>> {
     private static final MinecraftClient MC = MinecraftClient.getInstance();
 
-    public UserRuleListSqrEntry(Text fieldName, List<T> value, boolean defaultExpanded, Consumer<List<T>> saveConsumer) {
+    public UserRuleListSqrEntry(Text fieldName, List<T> value, boolean defaultExpanded, Consumer<List<T>> saveConsumer, Supplier<T> instanceCreator) {
         super(fieldName, value, defaultExpanded, null, saveConsumer, null, Text.translatable("controls.reset"), false, false, false, UserRuleCeil::new);
-        this.insertButtonEnabled = false;
+        this.createNewInstance = entry -> new UserRuleCeil<>(instanceCreator.get(), entry);
         this.resetWidget.visible = false;
     }
 
@@ -41,7 +41,6 @@ public class UserRuleListSqrEntry<T> extends AbstractListListEntry<T, UserRuleLi
         private final List<Element> widgets;
         private T value;
         private long lastTouch;
-        private boolean removed = false;
 
         @SuppressWarnings("unchecked")
         public UserRuleCeil(T value, UserRuleListSqrEntry<T> parentEntry) {
@@ -51,10 +50,18 @@ public class UserRuleListSqrEntry<T> extends AbstractListListEntry<T, UserRuleLi
 
             manageButton = ButtonWidget.builder(Text.translatable("fcitx5.controls.manage"), btn -> {
                 if (this.value instanceof ElementRule elementRule) {
-                    MC.setScreen(new ElementRuleEditScreen(MC.currentScreen, elementRule, this::handleDeletion, newValue -> this.value = (T) newValue));
+                    MC.setScreen(new ElementRuleEditScreen(MC.currentScreen, elementRule, this::handleDeletion, newValue -> {
+                        this.value = (T) newValue;
+                        parentEntry.save();
+                    }));
+
                     return;
                 } else if (this.value instanceof ScreenRule screenRule) {
-                    MC.setScreen(new ScreenRuleEditScreen(MC.currentScreen, screenRule, this::handleDeletion, newValue -> this.value = (T) newValue));
+                    MC.setScreen(new ScreenRuleEditScreen(MC.currentScreen, screenRule, this::handleDeletion, newValue -> {
+                        this.value = (T) newValue;
+                        parentEntry.save();
+                    }));
+
                     return;
                 }
 
@@ -65,6 +72,10 @@ public class UserRuleListSqrEntry<T> extends AbstractListListEntry<T, UserRuleLi
         }
 
         public static String getSimpleClassName(String qualifiedName) {
+            if (qualifiedName == null) {
+                return "-";
+            }
+
             if (!qualifiedName.contains(".")) {
                 return qualifiedName;
             }
@@ -87,6 +98,7 @@ public class UserRuleListSqrEntry<T> extends AbstractListListEntry<T, UserRuleLi
             return 20;
         }
 
+        @SuppressWarnings("DeconstructionCanBeUsed")
         @Override
         public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             // Background gradient
@@ -102,27 +114,21 @@ public class UserRuleListSqrEntry<T> extends AbstractListListEntry<T, UserRuleLi
 
             // Content
             if (value instanceof ElementRule elementRule) {
-                MutableText text = Text.literal((elementRule.comment == null || elementRule.comment.isEmpty()) ? "%s#%s".formatted(getSimpleClassName(elementRule.screenClassName), getSimpleClassName(elementRule.elementClassName)) : "%s (%s#%s)".formatted(elementRule.comment, getSimpleClassName(elementRule.screenClassName), getSimpleClassName(elementRule.elementClassName)));
-                context.drawTextWithShadow(MC.textRenderer, text.withColor(elementRule.shouldBlock ? 0xFF00FF00 /* GREEN */ : Colors.LIGHT_RED), x, y + 6, getPreferredTextColor());
+                MutableText text = Text.literal((elementRule.comment() == null || elementRule.comment()
+                        .isEmpty()) ? "%s#%s".formatted(getSimpleClassName(elementRule.screenClassName()), getSimpleClassName(elementRule.elementClassName())) : "%s (%s#%s)".formatted(elementRule.comment(), getSimpleClassName(elementRule.screenClassName()), getSimpleClassName(elementRule.elementClassName())));
+                context.drawTextWithShadow(MC.textRenderer, text.setStyle(text.getStyle()
+                        .withColor(elementRule.shouldBlock() ? 0xFF00FF00 /* GREEN */ : 0xFFDF505 /* LIGHT_RED */)), x, y + 6, getPreferredTextColor());
             } else if (value instanceof ScreenRule screenRule) {
-                MutableText text = Text.literal((screenRule.comment == null || screenRule.comment.isEmpty()) ? getSimpleClassName(screenRule.screenClassName) : "%s (%s)".formatted(screenRule.comment, getSimpleClassName(screenRule.screenClassName)));
-                context.drawTextWithShadow(MC.textRenderer, text.withColor(screenRule.shouldBlock ? 0xFF00FF00 /* GREEN */ : Colors.LIGHT_RED), x, y + 6, getPreferredTextColor());
+                MutableText text = Text.literal((screenRule.comment() == null || screenRule.comment()
+                        .isEmpty()) ? getSimpleClassName(screenRule.screenClassName()) : "%s (%s)".formatted(screenRule.comment(), getSimpleClassName(screenRule.screenClassName())));
+                context.drawTextWithShadow(MC.textRenderer, text.setStyle(text.getStyle()
+                        .withColor(screenRule.shouldBlock() ? 0xFF00FF00 /* GREEN */ : 0xFFDF505 /* LIGHT_RED */)), x, y + 6, getPreferredTextColor());
             } else {
                 throw new IllegalStateException("Can't handle rule of type " + value.getClass());
             }
 
             manageButton.setPosition(x + entryWidth - 150, y);
             manageButton.render(context, mouseX, mouseY, delta);
-        }
-
-        @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (removed) {
-                return false;
-            }
-
-            parentEntry.setFocused(this);
-            return super.mouseClicked(mouseX, mouseY, button);
         }
 
         @Override
@@ -141,6 +147,12 @@ public class UserRuleListSqrEntry<T> extends AbstractListListEntry<T, UserRuleLi
         }
 
         public void handleDeletion() {
+            if (this.value instanceof ElementRule rule) {
+                ModConfig.userElementRules.remove(rule);
+            } else if (this.value instanceof ScreenRule rule) {
+                ModConfig.userScreenRules.remove(rule);
+            }
+
             parentEntry.cells.remove(this);
             parentEntry.widgets.remove(this);
             parentEntry.narratables.remove(this);
@@ -148,8 +160,6 @@ public class UserRuleListSqrEntry<T> extends AbstractListListEntry<T, UserRuleLi
             if (parentEntry.getFocused() == this) {
                 parentEntry.setFocused(null);
             }
-
-            removed = true;
         }
     }
 }

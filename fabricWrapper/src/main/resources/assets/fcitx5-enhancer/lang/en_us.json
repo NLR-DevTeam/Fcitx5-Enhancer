@@ -26,6 +26,14 @@
   "fcitx5.config.builtinRules.commandInput.directInput.tooltip": "Indicates if we should prevent your IME from activating when directly typing commands.\n\nIncluding:\n - Clicking on key \"%s\"\n - Clicking on signs which have message components that suggests command",
   "fcitx5.config.builtinRules.commandInput.later.title": "Deactivate on Typing Later",
   "fcitx5.config.builtinRules.commandInput.later.tooltip": "Indicates if we should deactivate your IME when typing a \"/\" in the input widget.\n\nIncluding:\n - Open chat HUD firstly and then type a \"/\"\n - Clicking on messages that have components that suggests command",
+  "fcitx5.config.builtinRules.inventory.inventory.title": "Deactivate on Opening Inventory Screens",
+  "fcitx5.config.builtinRules.inventory.inventory.tooltip": "Including:\n - Survival Inventory\n - Creative Inventory",
+  "fcitx5.config.builtinRules.inventory.creativeSearch.title": "Deactivate on Selecting Creative Search Element",
+  "fcitx5.config.builtinRules.interactable.blocks.title": "Deactivate on Opening Screens of Interactable Blocks",
+  "fcitx5.config.builtinRules.interactable.blocks.tooltip": "Including:\n - Crafting Table, Stonecutter, etc.\n - Command Block, Structure Block, etc.",
+  "fcitx5.config.builtinRules.interactable.items.title": "Deactivate on Opening Screens of Interactable Items",
+  "fcitx5.config.builtinRules.interactable.items.tooltip": "Including:\n - Written Books",
+  "fcitx5.config.builtinRules.interactable.anvilRename.title": "Deactivate on Selecting Anvil Rename Element",
   "fcitx5.config.category.userRules": "User Rules",
   "fcitx5.config.userRules.subCategory.elementRules": "Custom Element Rules",
   "fcitx5.config.userRules.subCategory.screenRules": "Custom Screen Rules",
@@ -37,5 +45,8 @@
   "fcitx5.config.nativeWayland.preeditY.title": "Preedit Preview Overlay Y Position",
   "fcitx5.config.nativeWayland.preeditY.description": "Indicates the Y (vertical) position of the overlay.",
   "fcitx5.selector.none": "Left-click on an element to select it, or right-click to select the whole screen. Press ESC to cancel.",
-  "fcitx5.selector.selecting": "Selecting Element: %s"
+  "fcitx5.selector.selecting": "Selecting Element: %s",
+  "fcitx5.selector.completed": "Selection Completed",
+  "fcitx5.selector.new": "Creating new rule",
+  "fcitx5.selector.existing": "Editing existing rule"
 }
