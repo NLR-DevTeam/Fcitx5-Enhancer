@@ -11,6 +11,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+//#if MC >= 12110
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
+//#endif
+
 /**
  * This mixin intercepts key events when the user is typing using Fcitx 5,
  * which avoids unexpected screen closing or interaction.
@@ -41,7 +46,12 @@ public class KeyboardMixin {
     }
 
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
-    public void onKey(long window, int key, int scancode, int action, int modifiers, CallbackInfo ci) {
+    //#if MC >= 12110
+    public void onKey(long window, int action, KeyInput input, CallbackInfo ci) {
+        int key = input.key();
+        //#else
+        //$$ public void onKey(long window, int key, int scancode, int action, int modifiers, CallbackInfo ci) {
+        //#endif
         Main.allowToType = true;
         if (window != HANDLE) {
             return;
@@ -58,7 +68,11 @@ public class KeyboardMixin {
     }
 
     @Inject(method = "onChar", at = @At("HEAD"), cancellable = true)
-    public void onChar(long window, int codePoint, int modifiers, CallbackInfo ci) {
+    //#if MC >= 12110
+    public void onChar(long window, CharInput input, CallbackInfo ci) {
+        //#else
+        //$$ public void onChar(long window, int codePoint, int modifiers, CallbackInfo ci) {
+        //#endif
         if (window == HANDLE && Main.selectingElement) {
             ci.cancel();
         }

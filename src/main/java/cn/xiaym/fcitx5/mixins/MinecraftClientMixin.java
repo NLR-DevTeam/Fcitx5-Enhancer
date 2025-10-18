@@ -24,6 +24,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+//#if MC >= 12110
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.gui.hud.ChatHud;
+//#endif
+
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
     @Unique
@@ -108,7 +113,14 @@ public class MinecraftClientMixin {
             Fcitx5Wayland.onCommitString = text -> {
                 long handle = window.getHandle();
                 for (int i = 0, len = text.length(); i < len; i++) {
-                    ((KeyboardInvoker) keyboard).invokeOnChar(handle, Character.codePointAt(text, i), 0);
+                    int codePoint = Character.codePointAt(text, i);
+                    ((KeyboardInvoker) keyboard).invokeOnChar(handle,
+                            //#if MC >= 12110
+                            new CharInput(codePoint, 0)
+                            //#else
+                            //$$ codePoint, 0
+                            //#endif
+                    );
                 }
             };
 
@@ -135,8 +147,14 @@ public class MinecraftClientMixin {
         Main.allowToType = !isChatScreen;
     }
 
-    @Inject(method = "openChatScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;setScreen(Lnet/minecraft/client/gui/screen/Screen;)V", ordinal = 1))
-    public void openChatScreen(String text, CallbackInfo ci) {
+    //#if MC >= 12110
+    @Inject(method = "openChatScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;getChatHud()Lnet/minecraft/client/gui/hud/ChatHud;"))
+    public void openChatScreen(ChatHud.ChatMethod method, CallbackInfo ci) {
+        String text = method.getReplacement();
+        //#else
+        //$$ @Inject(method = "openChatScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;setScreen(Lnet/minecraft/client/gui/screen/Screen;)V", ordinal = 1))
+        //$$ public void openChatScreen(String text, CallbackInfo ci) {
+        //#endif
         if (text == null || !text.startsWith("/")) {
             return;
         }
@@ -153,7 +171,13 @@ public class MinecraftClientMixin {
                 Main.selectingElement = true;
             }
         } else {
-            if (InputUtil.isKeyPressed(window.getHandle(), InputUtil.GLFW_KEY_ESCAPE)) {
+            if (InputUtil.isKeyPressed(
+                    //#if MC >= 12110
+                    window,
+                    //#else
+                    //$$ window.getHandle(),
+                    //#endif
+                    InputUtil.GLFW_KEY_ESCAPE)) {
                 Main.selectingElement = false;
             }
         }

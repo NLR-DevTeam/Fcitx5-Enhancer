@@ -26,12 +26,14 @@ import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.render.state.GuiRenderState;
 //#else
 //$$ import cn.xiaym.fcitx5.compat.legacy.Rect;
+//$$ import net.minecraft.client.render.VertexConsumerProvider;
+
 //#if MC >= 12101
 //$$ import net.minecraft.client.util.BufferAllocator;
 //#else
 //$$ import net.minecraft.client.render.BufferBuilder;
 //#endif
-//$$ import net.minecraft.client.render.VertexConsumerProvider;
+
 //#endif
 
 @Mixin(GameRenderer.class)
@@ -81,7 +83,11 @@ public class GameRendererMixin {
 
         // Collect Elements
         List<ScreenRect> rectList = new ArrayList<>();
-        state.forEachSimpleElement((simpleElementState, depth) -> rectList.add(simpleElementState.bounds()), GuiRenderState.LayerFilter.ALL);
+        state.forEachSimpleElement((simpleElementState
+                                    //#if MC <= 12108
+                                    //$$, depth
+                                    //#endif
+        ) -> rectList.add(simpleElementState.bounds()), GuiRenderState.LayerFilter.ALL);
 
         // Typically PressableTextElement
         if (rectList.isEmpty()) {
@@ -98,11 +104,13 @@ public class GameRendererMixin {
         //#else
         //$$ // Let DrawContextMixin take over this, then we'll receive `Rect`s
         //$$ Main.simulateDrawing = true;
+
         //#if MC >= 12101
         //$$ DrawContext vContext = new DrawContext(client, VertexConsumerProvider.immediate(new BufferAllocator(786432)));
         //#else
         //$$ DrawContext vContext = new DrawContext(client, VertexConsumerProvider.immediate(new BufferBuilder(786432)));
         //#endif
+
         //$$ drawable.render(vContext, mouseX, mouseY, deltaTicks);
         //$$ Main.simulateDrawing = false;
         //$$
@@ -110,11 +118,13 @@ public class GameRendererMixin {
         //$$ while (it.hasNext()) {
         //$$     Rect rect = it.next();
         //$$     context.fill(rect.x1(), rect.y1(), rect.x2(), rect.y2(),
+
         //#if MC >= 12104
         //$$         ColorHelper.getArgb(50, 0, 0, 255)
         //#else
         //$$         ColorHelper.Argb.getArgb(50, 0, 0, 255)
         //#endif
+
         //$$     );
         //$$     it.remove();
         //$$ }

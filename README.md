@@ -17,9 +17,9 @@ Besides, we added IME support for native Wayland environment.
 
 ## Requirements
 
-Fabric Loader is required to run this mod.
+Fabric Loader and a JVM shipped with Unsafe (for 1.20 and 1.20.1) are required to run this mod.
 
-[Cloth Config](https://modrinth.com/mod/cloth-config) is required. To access the config screen, you need
+[Cloth Config](https://modrinth.com/mod/cloth-config) is required too. To access the config screen, you need
 to install [Mod Menu](https://modrinth.com/mod/modmenu) as well.
 
 ## Building this Mod

@@ -17,9 +17,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.toast.SystemToast;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -34,6 +32,17 @@ import java.util.Optional;
 //$$ import java.util.Arrays;
 //$$ import sun.misc.Unsafe;
 //#endif
+
+//#if MC > 12006
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Shadow;
+//#endif
+
+//#if MC >= 12110
+import net.minecraft.client.input.MouseInput;
+import net.minecraft.client.gui.Click;
+//#endif
+
 @Mixin(Mouse.class)
 public class MouseMixin {
     @Unique
@@ -69,7 +78,12 @@ public class MouseMixin {
     //#endif
 
     @Inject(method = "onMouseButton", at = @At("HEAD"), cancellable = true)
-    public void onMouseButton(long window, int button, int action, int mods, CallbackInfo ci) {
+    //#if MC >= 12110
+    public void onMouseButton(long window, MouseInput input, int action, CallbackInfo ci) {
+        int button = input.button();
+        //#else
+        //$$ public void onMouseButton(long window, int button, int action, int mods, CallbackInfo ci) {
+        //#endif
         if (window != HANDLE || CLIENT.currentScreen == null || !Main.selectingElement) {
             return;
         }
@@ -110,15 +124,25 @@ public class MouseMixin {
         Main.selectingElement = false;
     }
 
-    //#if MC > 12101
-    @WrapOperation(method = "onMouseButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseClicked(DDI)Z"))
-    public boolean onMouseClickedElement(Screen instance, double d, double e, int i, Operation<Boolean> original) {
+    //#if MC >= 12110
+    @WrapOperation(method = "onMouseButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseClicked(Lnet/minecraft/client/gui/Click;Z)Z"))
+    public boolean onMouseClickedElement(Screen instance, Click click, boolean b, Operation<Boolean> original) {
+        boolean originalResult = original.call(instance, click, b);
+        double d = click.x();
+        double e = click.y();
+        //#else
+
+        //#if MC > 12101
+        //$$ @WrapOperation(method = "onMouseButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseClicked(DDI)Z"))
+        //$$ public boolean onMouseClickedElement(Screen instance, double d, double e, int i, Operation<Boolean> original) {
         //#else
         //$$ @WrapOperation(method = "method_1611", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseClicked(DDI)Z"))
         //$$ private static boolean onMouseClickedElement(Screen instance, double d, double e, int i, Operation<Boolean> original) {
         //$$ MinecraftClient client = MinecraftClient.getInstance();
         //#endif
-        boolean originalResult = original.call(instance, d, e, i);
+
+        //$$ boolean originalResult = original.call(instance, d, e, i);
+        //#endif
         if (client.currentScreen == null) {
             return originalResult;
         }
