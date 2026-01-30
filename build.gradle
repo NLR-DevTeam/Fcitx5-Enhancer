@@ -5,7 +5,7 @@ buildscript {
 }
 
 plugins {
-    id 'fabric-loom' version '1.11-SNAPSHOT' apply false
+    id 'fabric-loom' version '1.13-SNAPSHOT' apply false
     id 'com.replaymod.preprocess'
 }
 
