@@ -78,7 +78,11 @@ public class GameRendererMixin {
 
         //#if MC > 12105
         GuiRenderState state = new GuiRenderState();
-        DrawContext vContext = new DrawContext(MinecraftClient.getInstance(), state);
+        //#if MC >= 12111
+        DrawContext vContext = new DrawContext(client, state, mouseX, mouseY);
+        //#else
+        //$$ DrawContext vContext = new DrawContext(client, state);
+        //#endif
         drawable.render(vContext, mouseX, mouseY, deltaTicks);
 
         // Collect Elements
