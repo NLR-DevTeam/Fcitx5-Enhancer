@@ -1,11 +1,11 @@
 buildscript {
     dependencies {
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.25'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21'
     }
 }
 
 plugins {
-    id 'fabric-loom' version '1.13-SNAPSHOT' apply false
+    id 'fabric-loom' version '1.15-SNAPSHOT' apply false
     id 'com.replaymod.preprocess'
 }
 

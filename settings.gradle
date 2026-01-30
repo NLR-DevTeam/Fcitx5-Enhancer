@@ -7,8 +7,8 @@ pluginManagement {
 
         // Required by preprocessor
         maven {
-            name 'JitPack'
-            url 'https://jitpack.io'
+            name = 'JitPack'
+            url = 'https://jitpack.io'
         }
 
         gradlePluginPortal()
