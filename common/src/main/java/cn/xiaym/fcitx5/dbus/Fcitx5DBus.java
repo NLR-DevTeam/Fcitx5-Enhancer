@@ -1,13 +1,14 @@
 package cn.xiaym.fcitx5.dbus;
 
 import cn.xiaym.fcitx5.Fcitx5;
-import cn.xiaym.fcitx5.async.AsyncDispatcher;
 import org.freedesktop.dbus.connections.IDisconnectCallback;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * The D-Bus related binding interface.
@@ -17,7 +18,7 @@ public class Fcitx5DBus {
     public static final int STATE_UNKNOWN = 0;
     public static final int STATE_INACTIVE = 1;
     public static final int STATE_ACTIVE = 2;
-    private static final AsyncDispatcher STATE_DISPATCHER = new AsyncDispatcher();
+    private static final Executor ASYNC_EXECUTOR = Executors.newSingleThreadExecutor();
     private static DBusConnection connection;
     private static Fcitx5Controller1 controller;
 
@@ -68,12 +69,12 @@ public class Fcitx5DBus {
         return true;
     }
 
-    public static CompletableFuture<Integer> getStateAsync() {
-        if (!checkDBus()) {
-            return CompletableFuture.completedFuture(STATE_UNKNOWN);
-        }
+    public static int getState() {
+        return checkDBus() ? controller.state() : STATE_UNKNOWN;
+    }
 
-        return CompletableFuture.supplyAsync(() -> controller.state());
+    public static CompletableFuture<Integer> getStateAsync() {
+        return CompletableFuture.supplyAsync(Fcitx5DBus::getState, ASYNC_EXECUTOR);
     }
 
     public static void activate() {
@@ -81,7 +82,7 @@ public class Fcitx5DBus {
             return;
         }
 
-        STATE_DISPATCHER.dispatch(controller::activate);
+        controller.activate();
     }
 
     public static void deactivate() {
@@ -89,6 +90,6 @@ public class Fcitx5DBus {
             return;
         }
 
-        STATE_DISPATCHER.dispatch(controller::deactivate);
+        controller.deactivate();
     }
 }

@@ -1,15 +1,10 @@
 package cn.xiaym.fcitx5.mixins;
 
-import cn.xiaym.fcitx5.Fcitx5;
-import cn.xiaym.fcitx5.Fcitx5Wayland;
-import cn.xiaym.fcitx5.Main;
-import cn.xiaym.fcitx5.config.BuiltinRuleSet;
+import cn.xiaym.fcitx5.*;
 import cn.xiaym.fcitx5.config.ModConfig;
-import cn.xiaym.fcitx5.dbus.Fcitx5DBus;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
-import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.Window;
@@ -32,8 +27,6 @@ import net.minecraft.client.gui.hud.ChatHud;
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
     @Unique
-    private static boolean afterInGame = false;
-    @Unique
     private static boolean isWayland = false;
     @Shadow
     @Final
@@ -46,57 +39,12 @@ public class MinecraftClientMixin {
     private Window window;
 
     @Unique
-    private static void checkBlocker(Screen screen) {
+    private static void checkBlocker(Screen screen, Screen prevScreen) {
         if (!ModConfig.imBlockerEnabled) {
             return;
         }
 
-        if (screen == null) {
-            if (!afterInGame) {
-                afterInGame = true;
-            } else {
-                return;
-            }
-
-            if (Main.wasSuppressed()) {
-                Main.unsuppress();
-                return;
-            }
-
-            Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> {
-                if (!Main.screenSuppressed) {
-                    Main.initialState = it;
-                }
-
-                Main.screenSuppressed = false;
-                if (it != Fcitx5DBus.STATE_INACTIVE) {
-                    Fcitx5DBus.deactivate();
-                }
-            });
-
-            return;
-        }
-
-        afterInGame = false;
-
-        Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> {
-            String screenClass = screen.getClass().getName();
-            if (ModConfig.screenRuleShouldBlock(screenClass) || BuiltinRuleSet.screenRuleShouldBlock(screenClass)) {
-                Main.screenSuppressed = true;
-
-                if (it == Fcitx5DBus.STATE_ACTIVE) {
-                    Main.initialState = it;
-                    Fcitx5DBus.deactivate();
-                }
-
-                return;
-            }
-
-            Main.screenSuppressed = false;
-            if (Main.initialState == Fcitx5DBus.STATE_ACTIVE && it != Fcitx5DBus.STATE_ACTIVE && !Main.wasSuppressed()) {
-                Fcitx5DBus.activate();
-            }
-        });
+        IMBlockerListener.onScreenOpen(screen, prevScreen);
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))
@@ -124,11 +72,13 @@ public class MinecraftClientMixin {
                 }
             };
 
-            Fcitx5Wayland.onPreeditString = text -> Main.waylandPreedit = text;
+            Fcitx5Wayland.onPreeditString = text -> GlobalState.waylandPreedit = text;
 
             isWayland = true;
             onResolutionChanged(null);
         }
+
+        GlobalState.gameInitialized = true;
     }
 
     @Inject(method = "onResolutionChanged", at = @At("HEAD"))
@@ -140,11 +90,11 @@ public class MinecraftClientMixin {
 
     @Inject(method = "setScreen", at = @At("HEAD"))
     private void setScreen(Screen screen, CallbackInfo ci) {
-        checkBlocker(screen);
+        checkBlocker(screen, currentScreen);
 
-        boolean isChatScreen = screen instanceof ChatScreen;
-        Main.chatScrOpening = isChatScreen;
-        Main.allowToType = !isChatScreen;
+        boolean screenOpening = screen != null;
+        GlobalState.newScrOpening = screenOpening;
+        GlobalState.allowToType = !screenOpening;
     }
 
     //#if MC >= 12110
@@ -160,15 +110,15 @@ public class MinecraftClientMixin {
         }
 
         if (ModConfig.imBlockerEnabled && ModConfig.builtinCommandSuppressDirect) {
-            Main.suppress();
+            IMBlockerListener.suppress();
         }
     }
 
     @Inject(method = "tick", at = @At("TAIL"))
     public void onTickEnd(CallbackInfo ci) {
-        if (!Main.selectingElement) {
+        if (!GlobalState.selectingElement) {
             if (ModConfig.selectElementKey.matchesCurrentKey() && currentScreen != null) {
-                Main.selectingElement = true;
+                GlobalState.selectingElement = true;
             }
         } else {
             if (InputUtil.isKeyPressed(
@@ -178,7 +128,7 @@ public class MinecraftClientMixin {
                     //$$ window.getHandle(),
                     //#endif
                     InputUtil.GLFW_KEY_ESCAPE)) {
-                Main.selectingElement = false;
+                GlobalState.selectingElement = false;
             }
         }
     }

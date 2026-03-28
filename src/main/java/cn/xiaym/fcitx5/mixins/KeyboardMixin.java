@@ -1,7 +1,7 @@
 package cn.xiaym.fcitx5.mixins;
 
 import cn.xiaym.fcitx5.Fcitx5;
-import cn.xiaym.fcitx5.Main;
+import cn.xiaym.fcitx5.GlobalState;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
@@ -52,12 +52,12 @@ public class KeyboardMixin {
         //#else
         //$$ public void onKey(long window, int key, int scancode, int action, int modifiers, CallbackInfo ci) {
         //#endif
-        Main.allowToType = true;
+        GlobalState.allowToType = true;
         if (window != HANDLE) {
             return;
         }
 
-        if (Main.selectingElement) {
+        if (GlobalState.selectingElement) {
             ci.cancel();
             return;
         }
@@ -73,7 +73,7 @@ public class KeyboardMixin {
         //#else
         //$$ public void onChar(long window, int codePoint, int modifiers, CallbackInfo ci) {
         //#endif
-        if (window == HANDLE && Main.selectingElement) {
+        if (window == HANDLE && GlobalState.selectingElement) {
             ci.cancel();
         }
     }

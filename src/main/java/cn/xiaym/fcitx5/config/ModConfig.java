@@ -32,7 +32,7 @@ public class ModConfig {
     private static final HashMap<Class<?>, Serializer<Object>> INTERNAL_SERIALIZERS = new HashMap<>();
     private static final HashMap<Class<?>, Deserializer<Object>> INTERNAL_DESERIALIZERS = new HashMap<>();
     public static boolean imBlockerEnabled = true;
-    public static boolean restoreInitialState = false;
+    public static boolean enforceDeactivation = true;
     public static ModifierKeyCode selectElementKey = ModifierKeyCode.of(InputUtil.Type.KEYSYM.createFromCode(GLFW.GLFW_KEY_S), Modifier.of(false, true, true));
     public static boolean builtinCommandSuppressDirect = true;
     public static boolean builtinCommandDisableLater = true;
@@ -239,9 +239,9 @@ public class ModConfig {
                 .addEntry(entryBuilder.startBooleanToggle(Text.translatable("fcitx5.config.general.imBlockerEnabled.title"), imBlockerEnabled)
                         .setTooltip(Text.translatable("fcitx5.config.general.imBlockerEnabled.tooltip"))
                         .setDefaultValue(true).setSaveConsumer(newValue -> imBlockerEnabled = newValue).build())
-                .addEntry(entryBuilder.startBooleanToggle(Text.translatable("fcitx5.config.general.restoreInitialState.title"), restoreInitialState)
-                        .setTooltip(Text.translatable("fcitx5.config.general.restoreInitialState.tooltip"))
-                        .setDefaultValue(false).setSaveConsumer(newValue -> restoreInitialState = newValue).build())
+                .addEntry(entryBuilder.startBooleanToggle(Text.translatable("fcitx5.config.general.enforceDeactivation.title"), enforceDeactivation)
+                        .setTooltip(Text.translatable("fcitx5.config.general.enforceDeactivation.tooltip"))
+                        .setDefaultValue(false).setSaveConsumer(newValue -> enforceDeactivation = newValue).build())
                 .addEntry(entryBuilder.startModifierKeyCodeField(Text.translatable("fcitx5.config.general.selectElement.title"), selectElementKey)
                         .setTooltip(Text.translatable("fcitx5.config.general.selectElement.tooltip"))
                         .setDefaultValue(ModifierKeyCode.of(InputUtil.Type.KEYSYM.createFromCode(GLFW.GLFW_KEY_S), Modifier.of(false, true, true)))
@@ -327,7 +327,7 @@ public class ModConfig {
             }
         }
 
-        return false;
+        return BuiltinRuleSet.screenRuleShouldBlock(screenClass);
     }
 
     @FunctionalInterface

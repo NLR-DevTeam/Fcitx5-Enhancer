@@ -1,9 +1,11 @@
 package cn.xiaym.fcitx5.mixins;
 
-import cn.xiaym.fcitx5.Main;
+import cn.xiaym.fcitx5.GlobalState;
+import cn.xiaym.fcitx5.IMBlockerListener;
 import cn.xiaym.fcitx5.config.ModConfig;
-import cn.xiaym.fcitx5.dbus.Fcitx5DBus;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,38 +26,33 @@ public class TextFieldWidgetMixin {
     private String text;
 
     @Unique
-    private static void commandLaterDisable() {
+    private static void disableOnCommand() {
         if (!ModConfig.imBlockerEnabled || !ModConfig.builtinCommandDisableLater) {
             return;
         }
 
-        Fcitx5DBus.getStateAsync().thenAcceptAsync(it -> {
-            if (it != Fcitx5DBus.STATE_INACTIVE) {
-                Fcitx5DBus.deactivate();
-                Main.suppress();
-            }
-        });
+        IMBlockerListener.dispatchAsync(IMBlockerListener::tryDeactivate);
     }
 
     @Inject(method = "write", at = @At("HEAD"), cancellable = true)
     private void onWrite(String text, CallbackInfo ci) {
-        if (Main.chatScrOpening && !Main.allowToType) {
+        if (GlobalState.newScrOpening && !GlobalState.allowToType) {
             ci.cancel();
         }
 
         if ("/".equals(text) && this.text.isEmpty()) {
-            commandLaterDisable();
+            disableOnCommand();
         }
     }
 
     @SuppressWarnings("SuspiciousMethodCalls")
     @Inject(method = "setText", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/TextFieldWidget;onChanged(Ljava/lang/String;)V", shift = At.Shift.AFTER))
     private void onSetText(String text, CallbackInfo ci) {
-        if (!Main.chatScrOpening || !Objects.requireNonNull(MinecraftClient.getInstance().currentScreen).children()
-                .contains(this) || text == null || !text.startsWith("/")) {
+        Screen screen = Objects.requireNonNull(MinecraftClient.getInstance().currentScreen);
+        if (!GlobalState.newScrOpening || !(screen instanceof ChatScreen) || !screen.children().contains(this) || text == null || !text.startsWith("/")) {
             return;
         }
 
-        commandLaterDisable();
+        disableOnCommand();
     }
 }

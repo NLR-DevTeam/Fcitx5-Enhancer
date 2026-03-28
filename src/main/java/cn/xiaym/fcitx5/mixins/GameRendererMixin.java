@@ -1,6 +1,6 @@
 package cn.xiaym.fcitx5.mixins;
 
-import cn.xiaym.fcitx5.Main;
+import cn.xiaym.fcitx5.GlobalState;
 import cn.xiaym.fcitx5.config.ModConfig;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -49,26 +49,26 @@ public class GameRendererMixin {
         //#else
         //$$ @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;renderWithTooltip(Lnet/minecraft/client/gui/DrawContext;IIF)V"))
         //$$ public void wrapRender(Screen instance, DrawContext context, int mouseX, int mouseY, float deltaTicks, Operation<Void> original) {
-        //$$ Main.simulateDrawing = false;
+        //$$ GlobalState.simulateDrawing = false;
         //$$ original.call(instance, context, mouseX, mouseY, deltaTicks);
         //#endif
         TextRenderer textRenderer = client.textRenderer;
-        if (Main.waylandPreedit != null && ModConfig.nativeWaylandOverlayEnabled) {
-            int width = textRenderer.getWidth(Main.waylandPreedit);
+        if (GlobalState.waylandPreedit != null && ModConfig.nativeWaylandOverlayEnabled) {
+            int width = textRenderer.getWidth(GlobalState.waylandPreedit);
             int x = ModConfig.nativeWaylandOverlayX, y = ModConfig.nativeWaylandOverlayY, padding = 3;
 
             context.fill(x - padding, y - padding, x + width + padding, y + 10 + padding, Colors.WHITE);
-            context.drawText(textRenderer, Main.waylandPreedit, x, y, Colors.BLACK, false);
+            context.drawText(textRenderer, GlobalState.waylandPreedit, x, y, Colors.BLACK, false);
         }
 
-        if (!Main.selectingElement || client.currentScreen == null) {
+        if (!GlobalState.selectingElement || client.currentScreen == null) {
             return;
         }
 
         Optional<Element> elementOpt = client.currentScreen.hoveredElement(mouseX, mouseY);
         Element element;
-        if (elementOpt.isEmpty() || !((Main.selectedElement = element = elementOpt.get()) instanceof Drawable drawable)) {
-            Main.selectedElement = null;
+        if (elementOpt.isEmpty() || !((GlobalState.selectedElement = element = elementOpt.get()) instanceof Drawable drawable)) {
+            GlobalState.selectedElement = null;
             context.drawText(textRenderer, Text.translatable("fcitx5.selector.none"), 10, 10, Colors.WHITE, true);
             return;
         }
@@ -107,7 +107,7 @@ public class GameRendererMixin {
         }
         //#else
         //$$ // Let DrawContextMixin take over this, then we'll receive `Rect`s
-        //$$ Main.simulateDrawing = true;
+        //$$ GlobalState.simulateDrawing = true;
 
         //#if MC >= 12101
         //$$ DrawContext vContext = new DrawContext(client, VertexConsumerProvider.immediate(new BufferAllocator(786432)));
@@ -116,9 +116,9 @@ public class GameRendererMixin {
         //#endif
 
         //$$ drawable.render(vContext, mouseX, mouseY, deltaTicks);
-        //$$ Main.simulateDrawing = false;
+        //$$ GlobalState.simulateDrawing = false;
         //$$
-        //$$ Iterator<Rect> it = Main.simulatedRectSet.iterator();
+        //$$ Iterator<Rect> it = GlobalState.simulatedRectSet.iterator();
         //$$ while (it.hasNext()) {
         //$$     Rect rect = it.next();
         //$$     context.fill(rect.x1(), rect.y1(), rect.x2(), rect.y2(),

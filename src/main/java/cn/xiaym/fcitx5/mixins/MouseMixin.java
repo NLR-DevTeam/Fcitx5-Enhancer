@@ -1,11 +1,10 @@
 package cn.xiaym.fcitx5.mixins;
 
-import cn.xiaym.fcitx5.Main;
-import cn.xiaym.fcitx5.config.BuiltinRuleSet;
+import cn.xiaym.fcitx5.GlobalState;
+import cn.xiaym.fcitx5.IMBlockerListener;
 import cn.xiaym.fcitx5.config.ModConfig;
 import cn.xiaym.fcitx5.config.rules.ElementRule;
 import cn.xiaym.fcitx5.config.rules.ScreenRule;
-import cn.xiaym.fcitx5.dbus.Fcitx5DBus;
 import cn.xiaym.fcitx5.screen.ElementRuleEditScreen;
 import cn.xiaym.fcitx5.screen.ScreenRuleEditScreen;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -84,7 +83,7 @@ public class MouseMixin {
         //#else
         //$$ public void onMouseButton(long window, int button, int action, int mods, CallbackInfo ci) {
         //#endif
-        if (window != HANDLE || CLIENT.currentScreen == null || !Main.selectingElement) {
+        if (window != HANDLE || CLIENT.currentScreen == null || !GlobalState.selectingElement) {
             return;
         }
 
@@ -92,12 +91,12 @@ public class MouseMixin {
 
         switch (button) {
             case GLFW.GLFW_MOUSE_BUTTON_LEFT -> {
-                if (Main.selectedElement == null) {
+                if (GlobalState.selectedElement == null) {
                     return;
                 }
 
                 ElementRule rule = ModConfig.getOrCreateElementRule(CLIENT.currentScreen.getClass()
-                        .getName(), Main.selectedElement.getClass().getName());
+                        .getName(), GlobalState.selectedElement.getClass().getName());
                 SystemToast.add(CLIENT.getToastManager(), TOAST_TYPE, Text.translatable("fcitx5.selector.completed"), Text.translatable(rule.comment() == null ? "fcitx5.selector.new" : "fcitx5.selector.existing"));
 
                 CLIENT.setScreen(new ElementRuleEditScreen(CLIENT.currentScreen, rule, () -> ModConfig.userElementRules.remove(rule), newValue -> {
@@ -121,7 +120,7 @@ public class MouseMixin {
             }
         }
 
-        Main.selectingElement = false;
+        GlobalState.selectingElement = false;
     }
 
     //#if MC >= 12110
@@ -147,50 +146,15 @@ public class MouseMixin {
             return originalResult;
         }
 
-        boolean ruleFound;
-        boolean shouldBlock;
-
         Optional<Element> hoveredOpt = instance.hoveredElement(d, e);
-        if (hoveredOpt.isPresent()) {
-            Element hovered = hoveredOpt.get();
-            String screenClass = client.currentScreen.getClass().getName();
-            String elementClass = hovered.getClass().getName();
-
-            // First user, then built-in.
-            ElementRule rule = ModConfig.getElementRule(screenClass, elementClass);
-            if (rule == null) {
-                rule = BuiltinRuleSet.getElementRule(screenClass, elementClass);
-            }
-
-            shouldBlock = (ruleFound = rule != null) && rule.shouldBlock();
-        } else {
-            ruleFound = false;
-            shouldBlock = false;
-        }
-
-
-        Fcitx5DBus.getStateAsync().thenAcceptAsync(state -> {
-            if (shouldBlock || (!ruleFound && Main.screenSuppressed)) {
-                if (state != Fcitx5DBus.STATE_ACTIVE) {
-                    return;
-                }
-
-                Main.initialState = state;
-                Fcitx5DBus.deactivate();
-                return;
-            }
-
-            if (Main.initialState == Fcitx5DBus.STATE_ACTIVE && state != Fcitx5DBus.STATE_ACTIVE) {
-                Fcitx5DBus.activate();
-            }
-        });
+        IMBlockerListener.onElementFocus(hoveredOpt.orElse(null), client.currentScreen);
 
         return hoveredOpt.isPresent();
     }
 
     @Inject(method = "onMouseScroll", at = @At("HEAD"), cancellable = true)
     public void onMouseScroll(long window, double horizontal, double vertical, CallbackInfo ci) {
-        if (window == HANDLE && Main.selectingElement) {
+        if (window == HANDLE && GlobalState.selectingElement) {
             ci.cancel();
         }
     }
@@ -201,7 +165,7 @@ public class MouseMixin {
         //#else
         //$$ public void onFilesDropped(long window, List<Path> paths, CallbackInfo ci) {
         //#endif
-        if (window == HANDLE && Main.selectingElement) {
+        if (window == HANDLE && GlobalState.selectingElement) {
             ci.cancel();
         }
     }
