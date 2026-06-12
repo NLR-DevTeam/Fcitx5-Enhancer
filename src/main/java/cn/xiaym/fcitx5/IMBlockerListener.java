@@ -4,8 +4,8 @@ import cn.xiaym.fcitx5.config.BuiltinRuleSet;
 import cn.xiaym.fcitx5.config.ModConfig;
 import cn.xiaym.fcitx5.config.rules.ElementRule;
 import cn.xiaym.fcitx5.dbus.Fcitx5DBus;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,7 +45,7 @@ public class IMBlockerListener {
         dispatchAsyncConditional(s -> (previousScreen == null && initialState == Fcitx5DBus.STATE_ACTIVE) || ensureConsistency(s), IMBlockerListener::tryActivate);
     }
 
-    public static void onElementFocus(@Nullable Element element, @NotNull Screen screen) {
+    public static void onElementFocus(@Nullable GuiEventListener element, @NotNull Screen screen) {
         if (!GlobalState.gameInitialized || screen != lastCheckedScreen) {
             return;
         }

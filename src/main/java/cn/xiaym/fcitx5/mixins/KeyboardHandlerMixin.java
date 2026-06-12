@@ -2,8 +2,10 @@ package cn.xiaym.fcitx5.mixins;
 
 import cn.xiaym.fcitx5.Fcitx5;
 import cn.xiaym.fcitx5.GlobalState;
-import net.minecraft.client.Keyboard;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.KeyboardHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -11,19 +13,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC >= 12110
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-//#endif
-
 /**
  * This mixin intercepts key events when the user is typing using Fcitx 5,
  * which avoids unexpected screen closing or interaction.
  */
-@Mixin(Keyboard.class)
-public class KeyboardMixin {
+@Mixin(KeyboardHandler.class)
+public class KeyboardHandlerMixin {
     @Unique
-    private static final long HANDLE = MinecraftClient.getInstance().getWindow().getHandle();
+    private static final long HANDLE = Minecraft.getInstance().getWindow().handle();
 
     @Unique
     private static final int[] PREVENT_KEYS = {
@@ -45,13 +42,9 @@ public class KeyboardMixin {
         return false;
     }
 
-    @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
-    //#if MC >= 12110
-    public void onKey(long window, int action, KeyInput input, CallbackInfo ci) {
+    @Inject(method = "keyPress", at = @At("HEAD"), cancellable = true)
+    public void onKey(long window, int action, KeyEvent input, CallbackInfo ci) {
         int key = input.key();
-        //#else
-        //$$ public void onKey(long window, int key, int scancode, int action, int modifiers, CallbackInfo ci) {
-        //#endif
         GlobalState.allowToType = true;
         if (window != HANDLE) {
             return;
@@ -67,12 +60,8 @@ public class KeyboardMixin {
         }
     }
 
-    @Inject(method = "onChar", at = @At("HEAD"), cancellable = true)
-    //#if MC >= 12110
-    public void onChar(long window, CharInput input, CallbackInfo ci) {
-        //#else
-        //$$ public void onChar(long window, int codePoint, int modifiers, CallbackInfo ci) {
-        //#endif
+    @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
+    public void onChar(long window, CharacterEvent input, CallbackInfo ci) {
         if (window == HANDLE && GlobalState.selectingElement) {
             ci.cancel();
         }

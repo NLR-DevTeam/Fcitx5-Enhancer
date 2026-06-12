@@ -12,14 +12,9 @@ base {
 }
 
 def common = project(':common')
-
-def fabric_subprojects = project.parent.subprojects.findAll({
+def subprojects = project.parent.subprojects.findAll({
     !['fabricWrapper', 'common'].contains(it.name)
 })
-
-fabric_subprojects.collect {
-    evaluationDependsOn(":${it.name}")
-}
 
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -27,8 +22,8 @@ jar {
     // disable cache
     outputs.upToDateWhen { false }
 
-    dependsOn(fabric_subprojects.collect {
-        it.tasks.remapJar
+    dependsOn(subprojects.collect {
+        it.tasks.jar
     })
 
     dependsOn(common.tasks.shadowJar)
@@ -38,8 +33,8 @@ jar {
 
         copy {
             from {
-                fabric_subprojects.collect {
-                    it.remapJar.outputs.files
+                subprojects.collect {
+                    it.jar.outputs.files
                 }
             }
 
@@ -55,7 +50,7 @@ jar {
 ArrayList<?> mc_condition = []
 ArrayList<?> jars = []
 
-fabric_subprojects.each({
+subprojects.each({
     Arrays.stream(it.minecraft_dependency.split(','))
             .map { it.trim() }
             .forEach { mc_condition.add(it) }
@@ -78,6 +73,6 @@ processResources {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }

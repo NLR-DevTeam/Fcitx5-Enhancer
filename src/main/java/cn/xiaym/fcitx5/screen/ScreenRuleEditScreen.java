@@ -1,12 +1,13 @@
 package cn.xiaym.fcitx5.screen;
 
 import cn.xiaym.fcitx5.config.rules.ScreenRule;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonColors;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -19,7 +20,7 @@ public class ScreenRuleEditScreen extends Screen {
     private final Consumer<ScreenRule> saveCallback;
 
     public ScreenRuleEditScreen(Screen parent, ScreenRule screenRule, Runnable removeCallback, Consumer<ScreenRule> saveCallback) {
-        super(Text.translatable("fcitx5.screen.screenRuleEdit.title"));
+        super(Component.translatable("fcitx5.screen.screenRuleEdit.title"));
         this.parentScreen = parent;
         this.screenRule = screenRule;
         this.removeCallback = removeCallback;
@@ -30,55 +31,49 @@ public class ScreenRuleEditScreen extends Screen {
     protected void init() {
         int centerX = width / 2;
 
-        TextFieldWidget commentField = addDrawableChild(new TextFieldWidget(textRenderer, centerX - 10, 40, 150, 20, null));
-        TextFieldWidget screenClassField = addDrawableChild(new TextFieldWidget(textRenderer, centerX - 10, 70, 150, 20, null));
+        EditBox commentField = addRenderableWidget(new EditBox(font, centerX - 10, 40, 150, 20, Component.empty()));
+        EditBox screenClassField = addRenderableWidget(new EditBox(font, centerX - 10, 70, 150, 20, Component.empty()));
         commentField.setMaxLength(65535);
         screenClassField.setMaxLength(65535);
-        commentField.setText(screenRule.comment() == null ? "" : screenRule.comment());
-        screenClassField.setText(nullSafe(screenRule.screenClassName()));
+        commentField.setValue(screenRule.comment() == null ? "" : screenRule.comment());
+        screenClassField.setValue(nullSafe(screenRule.screenClassName()));
 
         boolean[] shouldBlock = { screenRule.shouldBlock() };
-        addDrawableChild(ButtonWidget.builder(getYesOrNoText(shouldBlock[0]), button -> {
+        addRenderableWidget(Button.builder(getYesOrNoText(shouldBlock[0]), button -> {
             shouldBlock[0] = !shouldBlock[0];
             button.setMessage(getYesOrNoText(shouldBlock[0]));
-        }).dimensions(centerX - 10, 100, 150, 20).build());
+        }).bounds(centerX - 10, 100, 150, 20).build());
 
-        addDrawableChild(ButtonWidget.builder(Text.translatable("gui.cancel"), button -> close()).width(98)
-                .position(centerX - 150, height - 30).build());
+        addRenderableWidget(Button.builder(Component.translatable("gui.cancel"), _ -> onClose()).width(98)
+                .pos(centerX - 150, height - 30).build());
 
-        addDrawableChild(ButtonWidget.builder(Text.translatable("gui.done"), button -> {
-            saveCallback.accept(new ScreenRule(commentField.getText(), screenClassField.getText(), shouldBlock[0]));
-            close();
-        }).width(98).position(centerX - 50, height - 30).build());
+        addRenderableWidget(Button.builder(Component.translatable("gui.done"), _ -> {
+            saveCallback.accept(new ScreenRule(commentField.getValue(), screenClassField.getValue(), shouldBlock[0]));
+            onClose();
+        }).width(98).pos(centerX - 50, height - 30).build());
 
-        addDrawableChild(createRemoveButton(centerX + 50, height - 30, () -> {
+        addRenderableWidget(createRemoveButton(centerX + 50, height - 30, () -> {
             removeCallback.run();
-            close();
+            onClose();
         })).active = screenRule.comment() != null /* Disable if is newly created */;
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
-        //#if MC <= 12000
-        //$$ this.renderBackground(context);
-        //#endif
-
-        super.render(context, mouseX, mouseY, deltaTicks);
+    public void extractRenderState(@NotNull GuiGraphicsExtractor context, int mouseX, int mouseY, float a) {
+        super.extractRenderState(context, mouseX, mouseY, a);
         int centerX = width / 2;
 
         // Title
-        context.drawCenteredTextWithShadow(textRenderer, Text.translatable("fcitx5.screen.screenRuleEdit.title"), centerX, 20, Colors.WHITE);
+        context.centeredText(font, Component.translatable("fcitx5.screen.screenRuleEdit.title"), centerX, 20, CommonColors.WHITE);
 
         // Fields
-        context.drawTextWithShadow(textRenderer, Text.translatable("fcitx5.screen.ruleEdit.item.comment"), centerX - 140, 48, Colors.WHITE);
-        context.drawTextWithShadow(textRenderer, Text.translatable("fcitx5.screen.ruleEdit.item.screenClass"), centerX - 140, 78, Colors.WHITE);
-        context.drawTextWithShadow(textRenderer, Text.translatable("fcitx5.screen.ruleEdit.item.shouldBlock"), centerX - 140, 108, Colors.WHITE);
+        context.text(font, Component.translatable("fcitx5.screen.ruleEdit.item.comment"), centerX - 140, 48, CommonColors.WHITE);
+        context.text(font, Component.translatable("fcitx5.screen.ruleEdit.item.screenClass"), centerX - 140, 78, CommonColors.WHITE);
+        context.text(font, Component.translatable("fcitx5.screen.ruleEdit.item.shouldBlock"), centerX - 140, 108, CommonColors.WHITE);
     }
 
     @Override
-    public void close() {
-        if (client != null) {
-            client.setScreen(parentScreen);
-        }
+    public void onClose() {
+        minecraft.setScreen(parentScreen);
     }
 }

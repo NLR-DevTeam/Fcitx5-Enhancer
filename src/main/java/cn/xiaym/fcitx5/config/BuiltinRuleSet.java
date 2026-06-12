@@ -4,9 +4,9 @@ import cn.xiaym.fcitx5.config.rules.ElementRule;
 import cn.xiaym.fcitx5.config.rules.ScreenRule;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
-import net.minecraft.client.gui.screen.ingame.*;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.inventory.*;
+import net.minecraft.network.chat.Component;
 
 import java.util.List;
 import java.util.Objects;
@@ -20,7 +20,7 @@ public class BuiltinRuleSet {
                             getTranslation("inventory.inventory.tooltip"),
                             true,
                             ScreenRule.create(InventoryScreen.class, true),
-                            ScreenRule.create(CreativeInventoryScreen.class, true)
+                            ScreenRule.create(CreativeModeInventoryScreen.class, true)
                     )
             ), List.of(
                     new ElementRuleBinding(
@@ -28,7 +28,7 @@ public class BuiltinRuleSet {
                             getTranslation("inventory.creativeSearch.title"),
                             null,
                             false,
-                            ElementRule.create(CreativeInventoryScreen.class, TextFieldWidget.class, false)
+                            ElementRule.create(CreativeModeInventoryScreen.class, EditBox.class, false)
                     )
             )),
 
@@ -54,23 +54,20 @@ public class BuiltinRuleSet {
                             ScreenRule.create(BrewingStandScreen.class, true),
                             ScreenRule.create(BeaconScreen.class, true),
                             ScreenRule.create(LecternScreen.class, true),
-                            ScreenRule.create(GenericContainerScreen.class, true),
+                            ScreenRule.create(ContainerScreen.class, true),
                             ScreenRule.create(ShulkerBoxScreen.class, true),
 
                             // Red stone
-                            ScreenRule.create(Generic3x3ContainerScreen.class, true), // Dispenser, Dropper, etc.
-                            //#if MC > 12000
+                            ScreenRule.create(DispenserScreen.class, true), // Dispenser, Dropper, etc.
                             ScreenRule.create(CrafterScreen.class, true),
-                            //#endif
                             ScreenRule.create(HopperScreen.class, true),
 
                             // Administration
-                            ScreenRule.create(CommandBlockScreen.class, true),
-                            ScreenRule.create(JigsawBlockScreen.class, true),
-                            ScreenRule.create(StructureBlockScreen.class, true)
-                            //#if MC >= 12105
-                            , ScreenRule.create(TestBlockScreen.class, true),
-                            ScreenRule.create(TestInstanceBlockScreen.class, true)
+                            ScreenRule.create(CommandBlockEditScreen.class, true),
+                            ScreenRule.create(JigsawBlockEditScreen.class, true),
+                            ScreenRule.create(StructureBlockEditScreen.class, true),
+                            ScreenRule.create(TestBlockEditScreen.class, true),
+                            ScreenRule.create(TestInstanceBlockEditScreen.class, true)
                             //#endif
                     ),
 
@@ -79,7 +76,7 @@ public class BuiltinRuleSet {
                             getTranslation("interactable.items.title"),
                             getTranslation("interactable.items.tooltip"),
                             true,
-                            ScreenRule.create(BookScreen.class, true)
+                            ScreenRule.create(BookViewScreen.class, true)
                     )
             ), List.of(
                     new ElementRuleBinding(
@@ -87,13 +84,13 @@ public class BuiltinRuleSet {
                             getTranslation("interactable.anvilRename.title"),
                             null,
                             false,
-                            ElementRule.create(AnvilScreen.class, TextFieldWidget.class, false)
+                            ElementRule.create(AnvilScreen.class, EditBox.class, false)
                     )
             ))
     };
 
-    private static Text getTranslation(String key) {
-        return Text.translatable("fcitx5.config.builtinRules." + key);
+    private static Component getTranslation(String key) {
+        return Component.translatable("fcitx5.config.builtinRules." + key);
     }
 
     public static void applyConfig(ConfigCategory category, ConfigEntryBuilder entryBuilder) {
@@ -136,7 +133,7 @@ public class BuiltinRuleSet {
             for (ScreenRuleBinding ruleBinding : screenRules) {
                 category.addEntry(entryBuilder
                         .startBooleanToggle(ruleBinding.configTitle, ruleBinding.screenRules[0].shouldBlock())
-                        .setTooltip(ruleBinding.configTooltip == null ? new Text[]{} : new Text[]{ ruleBinding.configTooltip })
+                        .setTooltip(ruleBinding.configTooltip == null ? new Component[]{} : new Component[]{ ruleBinding.configTooltip })
                         .setDefaultValue(ruleBinding.defShouldBlock)
                         .setSaveConsumer(newValue -> {
                             for (int i = 0; i < ruleBinding.screenRules.length; i++) {
@@ -149,7 +146,7 @@ public class BuiltinRuleSet {
             for (ElementRuleBinding ruleBinding : elementRules) {
                 category.addEntry(entryBuilder
                         .startBooleanToggle(ruleBinding.configTitle, ruleBinding.elementRules[0].shouldBlock())
-                        .setTooltip(ruleBinding.configTooltip == null ? new Text[]{} : new Text[]{ ruleBinding.configTooltip })
+                        .setTooltip(ruleBinding.configTooltip == null ? new Component[]{} : new Component[]{ ruleBinding.configTooltip })
                         .setDefaultValue(ruleBinding.defShouldBlock)
                         .setSaveConsumer(newValue -> {
                             for (int i = 0; i < ruleBinding.elementRules.length; i++) {
@@ -163,12 +160,12 @@ public class BuiltinRuleSet {
 
     public static final class ScreenRuleBinding {
         public final String key;
-        public final Text configTitle;
-        public final Text configTooltip;
+        public final Component configTitle;
+        public final Component configTooltip;
         public final boolean defShouldBlock;
         public ScreenRule[] screenRules;
 
-        public ScreenRuleBinding(String key, Text configTitle, Text configTooltip, boolean defShouldBlock, ScreenRule... screenRules) {
+        public ScreenRuleBinding(String key, Component configTitle, Component configTooltip, boolean defShouldBlock, ScreenRule... screenRules) {
             this.key = key;
             this.configTitle = configTitle;
             this.configTooltip = configTooltip;
@@ -179,12 +176,12 @@ public class BuiltinRuleSet {
 
     public static final class ElementRuleBinding {
         public final String key;
-        public final Text configTitle;
-        public final Text configTooltip;
+        public final Component configTitle;
+        public final Component configTooltip;
         public final boolean defShouldBlock;
         public ElementRule[] elementRules;
 
-        public ElementRuleBinding(String key, Text configTitle, Text configTooltip, boolean defShouldBlock, ElementRule... elementRules) {
+        public ElementRuleBinding(String key, Component configTitle, Component configTooltip, boolean defShouldBlock, ElementRule... elementRules) {
             this.key = key;
             this.configTitle = configTitle;
             this.configTooltip = configTooltip;

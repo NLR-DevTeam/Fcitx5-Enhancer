@@ -2,12 +2,14 @@ package cn.xiaym.fcitx5.mixins;
 
 import cn.xiaym.fcitx5.*;
 import cn.xiaym.fcitx5.config.ModConfig;
-import net.minecraft.client.Keyboard;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.RunArgs;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.Window;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
+import net.minecraft.client.KeyboardHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.main.GameConfig;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWNativeWayland;
@@ -19,21 +21,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC >= 12110
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.gui.hud.ChatHud;
-//#endif
-
-@Mixin(MinecraftClient.class)
-public class MinecraftClientMixin {
+@Mixin(Minecraft.class)
+public class MinecraftMixin {
     @Unique
     private static boolean isWayland = false;
     @Shadow
     @Final
-    public Keyboard keyboard;
+    public KeyboardHandler keyboardHandler;
     @Shadow
     @Nullable
-    public Screen currentScreen;
+    public Screen screen;
     @Shadow
     @Final
     private Window window;
@@ -48,7 +45,7 @@ public class MinecraftClientMixin {
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void onInit(RunArgs args, CallbackInfo ci) {
+    private void onInit(GameConfig args, CallbackInfo ci) {
         if (GLFW.glfwGetPlatform() == GLFW.GLFW_PLATFORM_WAYLAND) {
             Fcitx5.LOGGER.info("Wayland detected - loading wayland support library...");
             Throwable throwable = Main.tryLoadLibrary("libwayland_support.so");
@@ -59,16 +56,10 @@ public class MinecraftClientMixin {
 
             Fcitx5Wayland.initialize(GLFWNativeWayland.glfwGetWaylandDisplay());
             Fcitx5Wayland.onCommitString = text -> {
-                long handle = window.getHandle();
+                long handle = window.handle();
                 for (int i = 0, len = text.length(); i < len; i++) {
                     int codePoint = Character.codePointAt(text, i);
-                    ((KeyboardInvoker) keyboard).invokeOnChar(handle,
-                            //#if MC >= 12110
-                            new CharInput(codePoint, 0)
-                            //#else
-                            //$$ codePoint, 0
-                            //#endif
-                    );
+                    ((KeyboardHandlerInvoker) keyboardHandler).invokeCharTyped(handle, new CharacterEvent(codePoint));
                 }
             };
 
@@ -81,31 +72,26 @@ public class MinecraftClientMixin {
         GlobalState.gameInitialized = true;
     }
 
-    @Inject(method = "onResolutionChanged", at = @At("HEAD"))
+    @Inject(method = "resizeGui", at = @At("HEAD"))
     private void onResolutionChanged(CallbackInfo ci) {
         if (isWayland) {
-            Fcitx5Wayland.updateWindow(window.getWidth(), window.getHeight() + 50);
+            Fcitx5Wayland.updateWindow(window.getScreenWidth(), window.getScreenHeight() + 50);
         }
     }
 
     @Inject(method = "setScreen", at = @At("HEAD"))
     private void setScreen(Screen screen, CallbackInfo ci) {
-        checkBlocker(screen, currentScreen);
+        checkBlocker(screen, screen);
 
         boolean screenOpening = screen != null;
         GlobalState.newScrOpening = screenOpening;
         GlobalState.allowToType = !screenOpening;
     }
 
-    //#if MC >= 12110
-    @Inject(method = "openChatScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;getChatHud()Lnet/minecraft/client/gui/hud/ChatHud;"))
-    public void openChatScreen(ChatHud.ChatMethod method, CallbackInfo ci) {
-        String text = method.getReplacement();
-        //#else
-        //$$ @Inject(method = "openChatScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;setScreen(Lnet/minecraft/client/gui/screen/Screen;)V", ordinal = 1))
-        //$$ public void openChatScreen(String text, CallbackInfo ci) {
-        //#endif
-        if (text == null || !text.startsWith("/")) {
+    @Inject(method = "openChatScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;getChat()Lnet/minecraft/client/gui/components/ChatComponent;"))
+    public void openChatScreen(ChatComponent.ChatMethod method, CallbackInfo ci) {
+        String text = method.prefix();
+        if (!text.startsWith("/")) {
             return;
         }
 
@@ -117,17 +103,11 @@ public class MinecraftClientMixin {
     @Inject(method = "tick", at = @At("TAIL"))
     public void onTickEnd(CallbackInfo ci) {
         if (!GlobalState.selectingElement) {
-            if (ModConfig.selectElementKey.matchesCurrentKey() && currentScreen != null) {
+            if (ModConfig.selectElementKey.matchesCurrentKey() && screen != null) {
                 GlobalState.selectingElement = true;
             }
         } else {
-            if (InputUtil.isKeyPressed(
-                    //#if MC >= 12110
-                    window,
-                    //#else
-                    //$$ window.getHandle(),
-                    //#endif
-                    InputUtil.GLFW_KEY_ESCAPE)) {
+            if (InputConstants.isKeyDown(window, InputConstants.KEY_ESCAPE)) {
                 GlobalState.selectingElement = false;
             }
         }

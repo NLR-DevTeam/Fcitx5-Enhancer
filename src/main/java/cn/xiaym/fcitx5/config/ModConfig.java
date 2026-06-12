@@ -8,13 +8,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.clothconfig2.api.*;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Field;
@@ -33,7 +33,7 @@ public class ModConfig {
     private static final HashMap<Class<?>, Deserializer<Object>> INTERNAL_DESERIALIZERS = new HashMap<>();
     public static boolean imBlockerEnabled = true;
     public static boolean enforceDeactivation = true;
-    public static ModifierKeyCode selectElementKey = ModifierKeyCode.of(InputUtil.Type.KEYSYM.createFromCode(GLFW.GLFW_KEY_S), Modifier.of(false, true, true));
+    public static ModifierKeyCode selectElementKey = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_S), Modifier.of(false, true, true));
     public static boolean builtinCommandSuppressDirect = true;
     public static boolean builtinCommandDisableLater = true;
     @SuppressWarnings("unused")
@@ -50,12 +50,12 @@ public class ModConfig {
 
         register(ModifierKeyCode.class, (o, k, v) -> {
             JsonObject serialized = new JsonObject();
-            serialized.addProperty("base", v.getKeyCode().getCode());
+            serialized.addProperty("base", v.getKeyCode().getValue());
             serialized.addProperty("modifier", v.getModifier().getValue());
             o.add(k, serialized);
         }, (o, k) -> {
             JsonObject serialized = o.getAsJsonObject(k);
-            return ModifierKeyCode.of(InputUtil.Type.KEYSYM.createFromCode(serialized.get("base")
+            return ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(serialized.get("base")
                     .getAsInt()), Modifier.of(serialized.get("modifier").getAsShort()));
         });
 
@@ -232,50 +232,50 @@ public class ModConfig {
 
     public static Screen createScreen(Screen parent) {
         ConfigBuilder builder = ConfigBuilder.create().setParentScreen(parent)
-                .setTitle(Text.translatable("fcitx5.config.title")).setSavingRunnable(ModConfig::saveConfig);
+                .setTitle(Component.translatable("fcitx5.config.title")).setSavingRunnable(ModConfig::saveConfig);
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
-        builder.getOrCreateCategory(Text.translatable("fcitx5.config.category.general"))
-                .addEntry(entryBuilder.startBooleanToggle(Text.translatable("fcitx5.config.general.imBlockerEnabled.title"), imBlockerEnabled)
-                        .setTooltip(Text.translatable("fcitx5.config.general.imBlockerEnabled.tooltip"))
+        builder.getOrCreateCategory(Component.translatable("fcitx5.config.category.general"))
+                .addEntry(entryBuilder.startBooleanToggle(Component.translatable("fcitx5.config.general.imBlockerEnabled.title"), imBlockerEnabled)
+                        .setTooltip(Component.translatable("fcitx5.config.general.imBlockerEnabled.tooltip"))
                         .setDefaultValue(true).setSaveConsumer(newValue -> imBlockerEnabled = newValue).build())
-                .addEntry(entryBuilder.startBooleanToggle(Text.translatable("fcitx5.config.general.enforceDeactivation.title"), enforceDeactivation)
-                        .setTooltip(Text.translatable("fcitx5.config.general.enforceDeactivation.tooltip"))
+                .addEntry(entryBuilder.startBooleanToggle(Component.translatable("fcitx5.config.general.enforceDeactivation.title"), enforceDeactivation)
+                        .setTooltip(Component.translatable("fcitx5.config.general.enforceDeactivation.tooltip"))
                         .setDefaultValue(false).setSaveConsumer(newValue -> enforceDeactivation = newValue).build())
-                .addEntry(entryBuilder.startModifierKeyCodeField(Text.translatable("fcitx5.config.general.selectElement.title"), selectElementKey)
-                        .setTooltip(Text.translatable("fcitx5.config.general.selectElement.tooltip"))
-                        .setDefaultValue(ModifierKeyCode.of(InputUtil.Type.KEYSYM.createFromCode(GLFW.GLFW_KEY_S), Modifier.of(false, true, true)))
+                .addEntry(entryBuilder.startModifierKeyCodeField(Component.translatable("fcitx5.config.general.selectElement.title"), selectElementKey)
+                        .setTooltip(Component.translatable("fcitx5.config.general.selectElement.tooltip"))
+                        .setDefaultValue(ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_S), Modifier.of(false, true, true)))
                         .setModifierSaveConsumer(newValue -> selectElementKey = newValue).build());
 
         // Built-in rules start
-        ConfigCategory builtinRulesCategory = builder.getOrCreateCategory(Text.translatable("fcitx5.config.category.builtinRules"));
-        SubCategoryBuilder commandInputSubCategory = entryBuilder.startSubCategory(Text.translatable("fcitx5.config.builtinRules.subCategory.commandInput"))
+        ConfigCategory builtinRulesCategory = builder.getOrCreateCategory(Component.translatable("fcitx5.config.category.builtinRules"));
+        SubCategoryBuilder commandInputSubCategory = entryBuilder.startSubCategory(Component.translatable("fcitx5.config.builtinRules.subCategory.commandInput"))
                 .setExpanded(true);
-        commandInputSubCategory.add(entryBuilder.startBooleanToggle(Text.translatable("fcitx5.config.builtinRules.commandInput.directInput.title"), builtinCommandSuppressDirect)
-                .setTooltip(Text.translatable("fcitx5.config.builtinRules.commandInput.directInput.tooltip", MinecraftClient.getInstance().options.commandKey.getBoundKeyLocalizedText()))
+        commandInputSubCategory.add(entryBuilder.startBooleanToggle(Component.translatable("fcitx5.config.builtinRules.commandInput.directInput.title"), builtinCommandSuppressDirect)
+                .setTooltip(Component.translatable("fcitx5.config.builtinRules.commandInput.directInput.tooltip", Minecraft.getInstance().options.keyCommand.getTranslatedKeyMessage()))
                 .setDefaultValue(true).setSaveConsumer(newValue -> builtinCommandSuppressDirect = newValue).build());
-        commandInputSubCategory.add(entryBuilder.startBooleanToggle(Text.translatable("fcitx5.config.builtinRules.commandInput.later.title"), builtinCommandDisableLater)
-                .setTooltip(Text.translatable("fcitx5.config.builtinRules.commandInput.later.tooltip"))
+        commandInputSubCategory.add(entryBuilder.startBooleanToggle(Component.translatable("fcitx5.config.builtinRules.commandInput.later.title"), builtinCommandDisableLater)
+                .setTooltip(Component.translatable("fcitx5.config.builtinRules.commandInput.later.tooltip"))
                 .setDefaultValue(true).setSaveConsumer(newValue -> builtinCommandDisableLater = newValue).build());
 
         builtinRulesCategory.addEntry(commandInputSubCategory.build());
         BuiltinRuleSet.applyConfig(builtinRulesCategory, entryBuilder);
         // Built-in rules end
 
-        builder.getOrCreateCategory(Text.translatable("fcitx5.config.category.userRules"))
-                .addEntry(new UserRuleListSqrEntry<>(Text.translatable("fcitx5.config.userRules.subCategory.elementRules"), userElementRules, true, newValue -> userElementRules = newValue, () -> new ElementRule("", null, null, false)))
-                .addEntry(new UserRuleListSqrEntry<>(Text.translatable("fcitx5.config.userRules.subCategory.screenRules"), userScreenRules, true, newValue -> userScreenRules = newValue, () -> new ScreenRule("", null, false)));
+        builder.getOrCreateCategory(Component.translatable("fcitx5.config.category.userRules"))
+                .addEntry(new UserRuleListSqrEntry<>(Component.translatable("fcitx5.config.userRules.subCategory.elementRules"), userElementRules, true, newValue -> userElementRules = newValue, () -> new ElementRule("", null, null, false)))
+                .addEntry(new UserRuleListSqrEntry<>(Component.translatable("fcitx5.config.userRules.subCategory.screenRules"), userScreenRules, true, newValue -> userScreenRules = newValue, () -> new ScreenRule("", null, false)));
 
-        builder.getOrCreateCategory(Text.translatable("fcitx5.config.category.nativeWayland"))
-                .addEntry(entryBuilder.startBooleanToggle(Text.translatable("fcitx5.config.nativeWayland.preeditEnabled.title"), nativeWaylandOverlayEnabled)
-                        .setTooltip(Text.translatable("fcitx5.config.nativeWayland.preeditEnabled.description"))
+        builder.getOrCreateCategory(Component.translatable("fcitx5.config.category.nativeWayland"))
+                .addEntry(entryBuilder.startBooleanToggle(Component.translatable("fcitx5.config.nativeWayland.preeditEnabled.title"), nativeWaylandOverlayEnabled)
+                        .setTooltip(Component.translatable("fcitx5.config.nativeWayland.preeditEnabled.description"))
                         .setDefaultValue(true).setSaveConsumer(newValue -> nativeWaylandOverlayEnabled = newValue)
                         .build())
-                .addEntry(entryBuilder.startIntField(Text.translatable("fcitx5.config.nativeWayland.preeditX.title"), nativeWaylandOverlayX)
-                        .setTooltip(Text.translatable("fcitx5.config.nativeWayland.preeditX.description"))
+                .addEntry(entryBuilder.startIntField(Component.translatable("fcitx5.config.nativeWayland.preeditX.title"), nativeWaylandOverlayX)
+                        .setTooltip(Component.translatable("fcitx5.config.nativeWayland.preeditX.description"))
                         .setDefaultValue(10).setSaveConsumer(newValue -> nativeWaylandOverlayX = newValue).build())
-                .addEntry(entryBuilder.startIntField(Text.translatable("fcitx5.config.nativeWayland.preeditY.title"), nativeWaylandOverlayY)
-                        .setTooltip(Text.translatable("fcitx5.config.nativeWayland.preeditY.description"))
+                .addEntry(entryBuilder.startIntField(Component.translatable("fcitx5.config.nativeWayland.preeditY.title"), nativeWaylandOverlayY)
+                        .setTooltip(Component.translatable("fcitx5.config.nativeWayland.preeditY.description"))
                         .setDefaultValue(10).setSaveConsumer(newValue -> nativeWaylandOverlayY = newValue).build());
 
         return builder.build();
