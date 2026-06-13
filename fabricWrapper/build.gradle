@@ -7,8 +7,11 @@ plugins {
 group = project.maven_group
 version = project.parent.version
 
+def baseName = project.archives_base_name
+def modVersion = project.mod_version
+
 base {
-    archivesName = "${project.archives_base_name}-${project.mod_version}-all"
+    archivesName = "${baseName}-${modVersion}-all"
 }
 
 def common = project(':common')
@@ -16,59 +19,41 @@ def subprojects = project.parent.subprojects.findAll({
     !['fabricWrapper', 'common'].contains(it.name)
 })
 
-jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+def mcConditions = subprojects.collectMany { sub ->
+    (sub.findProperty('minecraft_dependency') ?: "")
+            .split(',')
+            .collect { it.trim() }
+}.findAll { !it.isEmpty() }.unique()
 
-    // disable cache
-    outputs.upToDateWhen { false }
+def jarList = subprojects.collect { sub -> [file: "META-INF/jars/${project.archives_base_name}-${sub.minecraft_version}-${project.mod_version}.jar"] }
 
-    dependsOn(subprojects.collect {
-        it.tasks.jar
-    })
-
-    dependsOn(common.tasks.shadowJar)
-
-    doFirst {
-        delete fileTree("build/tmp/submods/META-INF/jars")
-
-        copy {
-            from {
-                subprojects.collect {
-                    it.jar.outputs.files
-                }
-            }
-
-            into "build/tmp/submods/META-INF/jars"
-        }
-    }
-
-    from("../LICENSE")
-    from("build/tmp/submods")
-    from(zipTree(common.shadowJar.archiveFile.asFile))
-}
-
-ArrayList<?> mc_condition = []
-ArrayList<?> jars = []
-
-subprojects.each({
-    Arrays.stream(it.minecraft_dependency.split(','))
-            .map { it.trim() }
-            .forEach { mc_condition.add(it) }
-    jars.add(["file": "META-INF/jars/${project.archives_base_name}-${it.minecraft_version}-${project.mod_version}.jar"])
-})
-
-Map<String, ?> properties = [
-        "minecraft_dependency": new JsonBuilder(mc_condition),
+def resourceProperties = [
+        "minecraft_dependency": new JsonBuilder(mcConditions).toString(),
         "version"             : project.mod_version,
-        "sub_jars"            : new JsonBuilder(jars).toPrettyString()
+        "sub_jars"            : new JsonBuilder(jarList).toPrettyString()
 ]
 
-processResources {
-    // disable cache
-    outputs.upToDateWhen { false }
+tasks.named('processResources') {
+    inputs.properties(resourceProperties)
 
     filesMatching("fabric.mod.json") {
-        expand(properties)
+        expand(resourceProperties)
+    }
+}
+
+tasks.named('jar', Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from(rootProject.file("LICENSE"))
+    from(common.tasks.named('shadowJar').flatMap { it.archiveFile }.map { zipTree(it) })
+
+    subprojects.each { sub ->
+        into("META-INF/jars") {
+            from(sub.tasks.named('jar'))
+            rename {
+                "${baseName}-${sub.minecraft_version}-${modVersion}.jar"
+            }
+        }
     }
 }
 

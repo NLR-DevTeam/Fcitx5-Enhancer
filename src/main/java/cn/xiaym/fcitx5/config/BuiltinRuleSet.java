@@ -68,7 +68,6 @@ public class BuiltinRuleSet {
                             ScreenRule.create(StructureBlockEditScreen.class, true),
                             ScreenRule.create(TestBlockEditScreen.class, true),
                             ScreenRule.create(TestInstanceBlockEditScreen.class, true)
-                            //#endif
                     ),
 
                     new ScreenRuleBinding(
