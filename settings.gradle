@@ -18,7 +18,8 @@ pluginManagement {
 includeBuild('preprocessor')
 
 def versions = [
-        '26.1.2'
+        '26.1.2',
+        '26.2'
 ]
 
 for (String version : versions) {

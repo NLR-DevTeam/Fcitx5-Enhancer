@@ -3,6 +3,9 @@ package cn.xiaym.fcitx5;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.ToastManager;
+import net.minecraft.client.gui.screens.Screen;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,7 +26,6 @@ public class Main implements ClientModInitializer {
      * We use this constant to avoid crashes and make it safe for mod-pack developers.
      */
     public static final boolean IS_LINUX = System.getProperty("os.name").toLowerCase().contains("linux");
-
     private static ModContainer parentMod;
 
     public static Throwable tryLoadLibrary(String name) {
@@ -60,6 +62,30 @@ public class Main implements ClientModInitializer {
         } catch (Throwable ex) {
             return ex;
         }
+    }
+
+    public static void setScreen(Screen screen) {
+        //#if MC >= 260200
+        Minecraft.getInstance().setScreenAndShow(screen);
+        //#else
+        //$$ Minecraft.getInstance().setScreen(screen);
+        //#endif
+    }
+
+    public static Screen getScreen() {
+        //#if MC >= 260200
+        return Minecraft.getInstance().gui.screen();
+        //#else
+        //$$ return Minecraft.getInstance().screen;
+        //#endif
+    }
+
+    public static ToastManager getToastManager() {
+        //#if MC >= 260200
+        return Minecraft.getInstance().gui.toastManager();
+        //#else
+        //$$ return Minecraft.getInstance().getToastManager();
+        //#endif
     }
 
     @Override

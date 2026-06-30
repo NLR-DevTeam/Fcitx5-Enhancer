@@ -1,5 +1,6 @@
 package cn.xiaym.fcitx5.config;
 
+import cn.xiaym.fcitx5.Main;
 import cn.xiaym.fcitx5.config.rules.ElementRule;
 import cn.xiaym.fcitx5.config.rules.ScreenRule;
 import cn.xiaym.fcitx5.screen.ElementRuleEditScreen;
@@ -51,14 +52,14 @@ public class UserRuleListSqrEntry<T> extends AbstractListListEntry<T, UserRuleLi
 
             manageButton = Button.builder(Component.translatable("fcitx5.controls.manage"), _ -> {
                 if (this.value instanceof ElementRule elementRule) {
-                    MC.setScreen(new ElementRuleEditScreen(MC.screen, elementRule, this::handleDeletion, newValue -> {
+                    Main.setScreen(new ElementRuleEditScreen(Main.getScreen(), elementRule, this::handleDeletion, newValue -> {
                         this.value = (T) newValue;
                         parentEntry.save();
                     }));
 
                     return;
                 } else if (this.value instanceof ScreenRule screenRule) {
-                    MC.setScreen(new ScreenRuleEditScreen(MC.screen, screenRule, this::handleDeletion, newValue -> {
+                    Main.setScreen(new ScreenRuleEditScreen(Main.getScreen(), screenRule, this::handleDeletion, newValue -> {
                         this.value = (T) newValue;
                         parentEntry.save();
                     }));

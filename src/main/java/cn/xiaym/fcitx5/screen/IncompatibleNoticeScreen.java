@@ -1,5 +1,6 @@
 package cn.xiaym.fcitx5.screen;
 
+import cn.xiaym.fcitx5.Main;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -35,6 +36,6 @@ public class IncompatibleNoticeScreen extends Screen {
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parentScreen);
+        Main.setScreen(parentScreen);
     }
 }

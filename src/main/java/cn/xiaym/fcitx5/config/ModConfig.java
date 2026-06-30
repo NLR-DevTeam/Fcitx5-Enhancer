@@ -40,9 +40,9 @@ public class ModConfig {
     public static BuiltinRuleSet.RuleSetBinding[] builtinRuleSets = BuiltinRuleSet.RULESETS;
     public static List<ElementRule> userElementRules = new ArrayList<>();
     public static List<ScreenRule> userScreenRules = new ArrayList<>();
-    public static boolean nativeWaylandOverlayEnabled = true;
-    public static int nativeWaylandOverlayX = 10;
-    public static int nativeWaylandOverlayY = 10;
+//    public static boolean nativeWaylandOverlayEnabled = true;
+//    public static int nativeWaylandOverlayX = 10;
+//    public static int nativeWaylandOverlayY = 10;
 
     static {
         register(boolean.class, JsonObject::addProperty, (o, k) -> o.get(k).getAsBoolean());
@@ -266,17 +266,17 @@ public class ModConfig {
                 .addEntry(new UserRuleListSqrEntry<>(Component.translatable("fcitx5.config.userRules.subCategory.elementRules"), userElementRules, true, newValue -> userElementRules = newValue, () -> new ElementRule("", null, null, false)))
                 .addEntry(new UserRuleListSqrEntry<>(Component.translatable("fcitx5.config.userRules.subCategory.screenRules"), userScreenRules, true, newValue -> userScreenRules = newValue, () -> new ScreenRule("", null, false)));
 
-        builder.getOrCreateCategory(Component.translatable("fcitx5.config.category.nativeWayland"))
-                .addEntry(entryBuilder.startBooleanToggle(Component.translatable("fcitx5.config.nativeWayland.preeditEnabled.title"), nativeWaylandOverlayEnabled)
-                        .setTooltip(Component.translatable("fcitx5.config.nativeWayland.preeditEnabled.description"))
-                        .setDefaultValue(true).setSaveConsumer(newValue -> nativeWaylandOverlayEnabled = newValue)
-                        .build())
-                .addEntry(entryBuilder.startIntField(Component.translatable("fcitx5.config.nativeWayland.preeditX.title"), nativeWaylandOverlayX)
-                        .setTooltip(Component.translatable("fcitx5.config.nativeWayland.preeditX.description"))
-                        .setDefaultValue(10).setSaveConsumer(newValue -> nativeWaylandOverlayX = newValue).build())
-                .addEntry(entryBuilder.startIntField(Component.translatable("fcitx5.config.nativeWayland.preeditY.title"), nativeWaylandOverlayY)
-                        .setTooltip(Component.translatable("fcitx5.config.nativeWayland.preeditY.description"))
-                        .setDefaultValue(10).setSaveConsumer(newValue -> nativeWaylandOverlayY = newValue).build());
+//        builder.getOrCreateCategory(Component.translatable("fcitx5.config.category.nativeWayland"))
+//                .addEntry(entryBuilder.startBooleanToggle(Component.translatable("fcitx5.config.nativeWayland.preeditEnabled.title"), nativeWaylandOverlayEnabled)
+//                        .setTooltip(Component.translatable("fcitx5.config.nativeWayland.preeditEnabled.description"))
+//                        .setDefaultValue(true).setSaveConsumer(newValue -> nativeWaylandOverlayEnabled = newValue)
+//                        .build())
+//                .addEntry(entryBuilder.startIntField(Component.translatable("fcitx5.config.nativeWayland.preeditX.title"), nativeWaylandOverlayX)
+//                        .setTooltip(Component.translatable("fcitx5.config.nativeWayland.preeditX.description"))
+//                        .setDefaultValue(10).setSaveConsumer(newValue -> nativeWaylandOverlayX = newValue).build())
+//                .addEntry(entryBuilder.startIntField(Component.translatable("fcitx5.config.nativeWayland.preeditY.title"), nativeWaylandOverlayY)
+//                        .setTooltip(Component.translatable("fcitx5.config.nativeWayland.preeditY.description"))
+//                        .setDefaultValue(10).setSaveConsumer(newValue -> nativeWaylandOverlayY = newValue).build());
 
         return builder.build();
     }

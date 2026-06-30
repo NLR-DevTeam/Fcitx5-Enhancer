@@ -2,6 +2,7 @@ package cn.xiaym.fcitx5.mixins;
 
 import cn.xiaym.fcitx5.GlobalState;
 import cn.xiaym.fcitx5.IMBlockerListener;
+import cn.xiaym.fcitx5.Main;
 import cn.xiaym.fcitx5.config.ModConfig;
 import cn.xiaym.fcitx5.config.rules.ElementRule;
 import cn.xiaym.fcitx5.config.rules.ScreenRule;
@@ -18,9 +19,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -33,19 +32,14 @@ import java.util.Optional;
 @Mixin(MouseHandler.class)
 public class MouseHandlerMixin {
     @Unique
-    private static final Minecraft CLIENT = Minecraft.getInstance();
-    @Unique
-    private static final long HANDLE = CLIENT.getWindow().handle();
+    private static final long HANDLE = Minecraft.getInstance().getWindow().handle();
     @Unique
     private static final SystemToast.SystemToastId TOAST_TYPE = new SystemToast.SystemToastId(3000);
 
-    @Shadow
-    @Final
-    private Minecraft minecraft;
-
     @Inject(method = "onButton", at = @At("HEAD"), cancellable = true)
     public void onMouseButton(long window, MouseButtonInfo input, int action, CallbackInfo ci) {
-        if (window != HANDLE || CLIENT.screen == null || !GlobalState.selectingElement) {
+        Screen screen = Main.getScreen();
+        if (window != HANDLE || screen == null || !GlobalState.selectingElement) {
             return;
         }
 
@@ -57,21 +51,21 @@ public class MouseHandlerMixin {
                     return;
                 }
 
-                ElementRule rule = ModConfig.getOrCreateElementRule(CLIENT.screen.getClass()
+                ElementRule rule = ModConfig.getOrCreateElementRule(screen.getClass()
                         .getName(), GlobalState.selectedElement.getClass().getName());
-                SystemToast.add(CLIENT.getToastManager(), TOAST_TYPE, Component.translatable("fcitx5.selector.completed"), Component.translatable(rule.comment() == null ? "fcitx5.selector.new" : "fcitx5.selector.existing"));
+                SystemToast.add(Main.getToastManager(), TOAST_TYPE, Component.translatable("fcitx5.selector.completed"), Component.translatable(rule.comment() == null ? "fcitx5.selector.new" : "fcitx5.selector.existing"));
 
-                CLIENT.setScreen(new ElementRuleEditScreen(CLIENT.screen, rule, () -> ModConfig.userElementRules.remove(rule), newValue -> {
+                Main.setScreen(new ElementRuleEditScreen(screen, rule, () -> ModConfig.userElementRules.remove(rule), newValue -> {
                     ModConfig.updateList(ModConfig.userElementRules, rule, newValue);
                     ModConfig.saveConfig();
                 }));
             }
 
             case GLFW.GLFW_MOUSE_BUTTON_RIGHT -> {
-                ScreenRule rule = ModConfig.getOrCreateScreenRule(CLIENT.screen.getClass().getName());
-                SystemToast.add(CLIENT.getToastManager(), TOAST_TYPE, Component.translatable("fcitx5.selector.completed"), Component.translatable(rule.comment() == null ? "fcitx5.selector.new" : "fcitx5.selector.existing"));
+                ScreenRule rule = ModConfig.getOrCreateScreenRule(screen.getClass().getName());
+                SystemToast.add(Main.getToastManager(), TOAST_TYPE, Component.translatable("fcitx5.selector.completed"), Component.translatable(rule.comment() == null ? "fcitx5.selector.new" : "fcitx5.selector.existing"));
 
-                CLIENT.setScreen(new ScreenRuleEditScreen(CLIENT.screen, rule, () -> ModConfig.userScreenRules.remove(rule), newValue -> {
+                Main.setScreen(new ScreenRuleEditScreen(screen, rule, () -> ModConfig.userScreenRules.remove(rule), newValue -> {
                     ModConfig.updateList(ModConfig.userScreenRules, rule, newValue);
                     ModConfig.saveConfig();
                 }));
@@ -88,12 +82,13 @@ public class MouseHandlerMixin {
     @WrapOperation(method = "onButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;mouseClicked(Lnet/minecraft/client/input/MouseButtonEvent;Z)Z"))
     public boolean onMouseClickedElement(Screen instance, MouseButtonEvent click, boolean b, Operation<Boolean> original) {
         boolean originalResult = original.call(instance, click, b);
-        if (minecraft.screen == null) {
+        Screen screen = Main.getScreen();
+        if (screen == null) {
             return originalResult;
         }
 
         Optional<GuiEventListener> hoveredOpt = instance.getChildAt(click.x(), click.y());
-        IMBlockerListener.onElementFocus(hoveredOpt.orElse(null), minecraft.screen);
+        IMBlockerListener.onElementFocus(hoveredOpt.orElse(null), screen);
 
         return hoveredOpt.isPresent();
     }

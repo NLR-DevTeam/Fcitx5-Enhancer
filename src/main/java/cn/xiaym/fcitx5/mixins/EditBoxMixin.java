@@ -2,8 +2,8 @@ package cn.xiaym.fcitx5.mixins;
 
 import cn.xiaym.fcitx5.GlobalState;
 import cn.xiaym.fcitx5.IMBlockerListener;
+import cn.xiaym.fcitx5.Main;
 import cn.xiaym.fcitx5.config.ModConfig;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -48,7 +48,7 @@ public class EditBoxMixin {
     @SuppressWarnings("SuspiciousMethodCalls")
     @Inject(method = "setValue", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/EditBox;onValueChange(Ljava/lang/String;)V", shift = At.Shift.AFTER))
     private void onSetText(String text, CallbackInfo ci) {
-        Screen screen = Objects.requireNonNull(Minecraft.getInstance().screen);
+        Screen screen = Objects.requireNonNull(Main.getScreen());
         if (!GlobalState.newScrOpening || !(screen instanceof ChatScreen) || !screen.children()
                 .contains(this) || text == null || !text.startsWith("/")) {
             return;

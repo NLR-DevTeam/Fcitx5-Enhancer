@@ -1,5 +1,6 @@
 package cn.xiaym.fcitx5.screen;
 
+import cn.xiaym.fcitx5.Main;
 import cn.xiaym.fcitx5.config.rules.ScreenRule;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -74,6 +75,6 @@ public class ScreenRuleEditScreen extends Screen {
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parentScreen);
+        Main.setScreen(parentScreen);
     }
 }

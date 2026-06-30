@@ -11,9 +11,11 @@ And then you'll be interrupted. That's crazy. So I wrote this mod, in order to d
 
 ## Extra Features
 
-We provides a highly configurable IMBlocker, with a visual element selector.
+We provide a highly configurable IMBlocker, with a visual element selector.
 
-Besides, we added IME support for native Wayland environment.
+~~Besides, we added IME support for native Wayland environment.~~
+
+*Native wayland support is currently disabled for 26.x. Please refer to the `1.20.x-1.21.x-0.2.5` branch for its source code.*
 
 ## Requirements
 
@@ -60,26 +62,6 @@ make
 
 Eventually you'll see a shared library file named `libfcitx5_detector.so` inside the `build` folder.  
 Then, place it into folder `.minecraft/.fcitx5-enhancer`.
-
-### Wayland Support (`libwayland_support.so`) (Optional)
-
-Requirements:
-
-- All prerequisites from the base library
-- Wayland Protocols (`libwayland-dev wayland-protocols` for Debian)
-- PkgConfig Tool (`pkg-config` for Debian)
-
-Run this in your terminal:
-
-```shell
-cd Fcitx5-Enhancer/src/native/wayland
-mkdir build && cd build
-cmake ..
-make
-```
-
-Finally you'll see a shared library file named `libwayland_support.so` inside the `build` folder.  
-Simply place it into folder `.minecraft/.fcitx5-enhancer`.
 
 ## License
 

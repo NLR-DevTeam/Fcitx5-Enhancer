@@ -1,17 +1,17 @@
 package cn.xiaym.fcitx5.mixins;
 
 import cn.xiaym.fcitx5.GlobalState;
-import cn.xiaym.fcitx5.config.ModConfig;
+import cn.xiaym.fcitx5.Main;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
@@ -25,29 +25,42 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Mixin(GameRenderer.class)
+@Mixin(
+        //#if MC >= 260200
+        Gui.class
+        //#else
+        //$$ net.minecraft.client.renderer.GameRenderer.class
+        //#endif
+)
 public class GameRendererMixin {
     @Shadow
     @Final
     private Minecraft minecraft;
 
-    @WrapOperation(method = "extractGui", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;extractRenderStateWithTooltipAndSubtitles(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIF)V"))
+    @WrapOperation(method =
+            //#if MC >= 260200
+            "extractRenderState"
+            //#else
+            //$$ "extractGui"
+            //#endif
+            , at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;extractRenderStateWithTooltipAndSubtitles(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIF)V"))
     public void wrapRender(Screen instance, GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks, Operation<Void> original) {
         original.call(instance, context, mouseX, mouseY, deltaTicks);
         Font textRenderer = minecraft.font;
-        if (GlobalState.waylandPreedit != null && ModConfig.nativeWaylandOverlayEnabled) {
-            int width = textRenderer.width(GlobalState.waylandPreedit);
-            int x = ModConfig.nativeWaylandOverlayX, y = ModConfig.nativeWaylandOverlayY, padding = 3;
+//        if (GlobalState.waylandPreedit != null && ModConfig.nativeWaylandOverlayEnabled) {
+//            int width = textRenderer.width(GlobalState.waylandPreedit);
+//            int x = ModConfig.nativeWaylandOverlayX, y = ModConfig.nativeWaylandOverlayY, padding = 3;
+//
+//            context.fill(x - padding, y - padding, x + width + padding, y + 10 + padding, CommonColors.WHITE);
+//            context.text(textRenderer, GlobalState.waylandPreedit, x, y, CommonColors.BLACK, false);
+//        }
 
-            context.fill(x - padding, y - padding, x + width + padding, y + 10 + padding, CommonColors.WHITE);
-            context.text(textRenderer, GlobalState.waylandPreedit, x, y, CommonColors.BLACK, false);
-        }
-
-        if (!GlobalState.selectingElement || minecraft.screen == null) {
+        Screen screen = Main.getScreen();
+        if (!GlobalState.selectingElement || screen == null) {
             return;
         }
 
-        Optional<GuiEventListener> elementOpt = minecraft.screen.getChildAt(mouseX, mouseY);
+        Optional<GuiEventListener> elementOpt = screen.getChildAt(mouseX, mouseY);
         GuiEventListener element;
         if (elementOpt.isEmpty() || !((GlobalState.selectedElement = element = elementOpt.get()) instanceof Renderable drawable)) {
             GlobalState.selectedElement = null;

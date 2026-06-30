@@ -2,17 +2,18 @@
   "required": true,
   "minVersion": "0.8",
   "package": "cn.xiaym.fcitx5.mixins",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_25",
   "injectors": {
     "defaultRequire": 1
   },
   "plugin": "cn.xiaym.fcitx5.MixinPlugin",
   "client": [
+    "EditBoxMixin",
     "GameRendererMixin",
+    "GuiMixin",
     "KeyboardHandlerInvoker",
     "KeyboardHandlerMixin",
     "MinecraftMixin",
-    "MouseHandlerMixin",
-    "EditBoxMixin"
+    "MouseHandlerMixin"
   ]
 }

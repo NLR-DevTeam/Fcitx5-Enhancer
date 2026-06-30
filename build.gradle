@@ -10,6 +10,9 @@ plugins {
 }
 
 preprocess {
-    createNode('26.1.2', 26_01_02, 'mojang')
+    def mc260102 = createNode('26.1.2', 26_01_02, 'mojang')
+    def mc260200 = createNode('26.2', 26_02_00, 'mojang')
+    mc260102.link(mc260200, null)
+
     strictExtraMappings.set(false)
 }
