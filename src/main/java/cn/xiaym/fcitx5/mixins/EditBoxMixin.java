@@ -14,8 +14,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Objects;
-
 /**
  * This class intercepts duplicated input events (using Main#allowToType),
  * which avoids 't' or '//' appearing in the input box unexpectedly.
@@ -48,7 +46,7 @@ public class EditBoxMixin {
     @SuppressWarnings("SuspiciousMethodCalls")
     @Inject(method = "setValue", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/EditBox;onValueChange(Ljava/lang/String;)V", shift = At.Shift.AFTER))
     private void onSetText(String text, CallbackInfo ci) {
-        Screen screen = Objects.requireNonNull(Main.getScreen());
+        Screen screen = Main.getScreen();
         if (!GlobalState.newScrOpening || !(screen instanceof ChatScreen) || !screen.children()
                 .contains(this) || text == null || !text.startsWith("/")) {
             return;
