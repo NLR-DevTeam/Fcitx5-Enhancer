@@ -90,7 +90,7 @@ public class MouseHandlerMixin {
         Optional<GuiEventListener> hoveredOpt = instance.getChildAt(click.x(), click.y());
         IMBlockerListener.onElementFocus(hoveredOpt.orElse(null), screen);
 
-        return hoveredOpt.isPresent();
+        return originalResult;
     }
 
     @Inject(method = "onScroll", at = @At("HEAD"), cancellable = true)
