@@ -148,8 +148,7 @@ public class MouseMixin {
 
         Optional<Element> hoveredOpt = instance.hoveredElement(d, e);
         IMBlockerListener.onElementFocus(hoveredOpt.orElse(null), client.currentScreen);
-
-        return hoveredOpt.isPresent();
+        return originalResult;
     }
 
     @Inject(method = "onMouseScroll", at = @At("HEAD"), cancellable = true)
