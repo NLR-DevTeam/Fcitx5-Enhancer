@@ -241,7 +241,7 @@ public class ModConfig {
                         .setDefaultValue(true).setSaveConsumer(newValue -> imBlockerEnabled = newValue).build())
                 .addEntry(entryBuilder.startBooleanToggle(Component.translatable("fcitx5.config.general.enforceDeactivation.title"), enforceDeactivation)
                         .setTooltip(Component.translatable("fcitx5.config.general.enforceDeactivation.tooltip"))
-                        .setDefaultValue(false).setSaveConsumer(newValue -> enforceDeactivation = newValue).build())
+                        .setDefaultValue(true).setSaveConsumer(newValue -> enforceDeactivation = newValue).build())
                 .addEntry(entryBuilder.startModifierKeyCodeField(Component.translatable("fcitx5.config.general.selectElement.title"), selectElementKey)
                         .setTooltip(Component.translatable("fcitx5.config.general.selectElement.tooltip"))
                         .setDefaultValue(ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_S), Modifier.of(false, true, true)))

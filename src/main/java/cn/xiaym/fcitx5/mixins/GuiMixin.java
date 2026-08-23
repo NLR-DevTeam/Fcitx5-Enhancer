@@ -6,7 +6,9 @@ import cn.xiaym.fcitx5.config.ModConfig;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.screens.Screen;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,6 +22,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
         //#endif
 )
 public class GuiMixin {
+    @Shadow
+    private @Nullable Screen screen;
+
     @Unique
     private static void checkBlocker(Screen screen, Screen prevScreen) {
         if (!ModConfig.imBlockerEnabled) {
@@ -31,11 +36,13 @@ public class GuiMixin {
 
     @Inject(method = "setScreen", at = @At("HEAD"))
     private void setScreen(Screen screen, CallbackInfo ci) {
-        checkBlocker(screen, screen);
+        checkBlocker(screen, this.screen);
 
         boolean screenOpening = screen != null;
         GlobalState.newScrOpening = screenOpening;
         GlobalState.allowToType = !screenOpening;
+
+        GlobalState.selectingElement = false;
     }
 
     @Inject(method = "openChatScreen", at = @At(value = "INVOKE", target =
