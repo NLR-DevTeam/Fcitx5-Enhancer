@@ -18,7 +18,7 @@ public class IMBlockerListener {
     private static int lastSetState = Fcitx5DBus.STATE_UNKNOWN;
     private static boolean currentScreenBlocking = false;
     private static Screen lastCheckedScreen = null;
-    private static boolean suppressed = false;
+    private static volatile boolean suppressed = false;
 
     public static void onScreenOpen(@Nullable Screen screen, @Nullable Screen previousScreen) {
         if (!GlobalState.gameInitialized) {

@@ -95,6 +95,8 @@ public class MinecraftClientMixin {
         boolean screenOpening = screen != null;
         GlobalState.newScrOpening = screenOpening;
         GlobalState.allowToType = !screenOpening;
+
+        GlobalState.selectingElement = false;
     }
 
     //#if MC >= 12110

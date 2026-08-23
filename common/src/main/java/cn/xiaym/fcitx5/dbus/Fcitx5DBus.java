@@ -13,12 +13,16 @@ import java.util.concurrent.Executors;
 /**
  * The D-Bus related binding interface.
  */
-@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 public class Fcitx5DBus {
     public static final int STATE_UNKNOWN = 0;
     public static final int STATE_INACTIVE = 1;
     public static final int STATE_ACTIVE = 2;
-    private static final Executor ASYNC_EXECUTOR = Executors.newSingleThreadExecutor();
+    private static final Executor ASYNC_EXECUTOR = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        return t;
+    });
+
     private static DBusConnection connection;
     private static Fcitx5Controller1 controller;
 
