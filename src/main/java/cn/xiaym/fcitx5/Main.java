@@ -111,6 +111,7 @@ public class Main implements ClientModInitializer {
             throw new RuntimeException(throwable);
         }
 
+        Fcitx5.initialize();
         if (!Fcitx5.findWindow()) {
             Fcitx5.LOGGER.warn("Fcitx5 is not running, this mod will not take effect unless it's started.");
         }
