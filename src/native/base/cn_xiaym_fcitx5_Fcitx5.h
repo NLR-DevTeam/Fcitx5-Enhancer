@@ -9,18 +9,18 @@ extern "C" {
 #endif
 /*
  * Class:     cn_xiaym_fcitx5_Fcitx5
- * Method:    findWindow
- * Signature: ()Z
+ * Method:    initialize
+ * Signature: ()V
  */
-JNIEXPORT jboolean JNICALL Java_cn_xiaym_fcitx5_Fcitx5_findWindow
+JNIEXPORT void JNICALL Java_cn_xiaym_fcitx5_Fcitx5_initialize
   (JNIEnv *, jclass);
 
 /*
  * Class:     cn_xiaym_fcitx5_Fcitx5
- * Method:    userTyping
+ * Method:    findWindow
  * Signature: ()Z
  */
-JNIEXPORT jboolean JNICALL Java_cn_xiaym_fcitx5_Fcitx5_userTyping
+JNIEXPORT jboolean JNICALL Java_cn_xiaym_fcitx5_Fcitx5_findWindow
   (JNIEnv *, jclass);
 
 #ifdef __cplusplus
