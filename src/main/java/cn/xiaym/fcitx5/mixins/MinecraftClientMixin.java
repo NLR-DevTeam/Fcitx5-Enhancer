@@ -90,6 +90,7 @@ public class MinecraftClientMixin {
 
     @Inject(method = "setScreen", at = @At("HEAD"))
     private void setScreen(Screen screen, CallbackInfo ci) {
+        Fcitx5.disarmEndKeyGrace();
         checkBlocker(screen, currentScreen);
 
         boolean screenOpening = screen != null;

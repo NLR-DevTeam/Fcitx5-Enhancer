@@ -62,8 +62,12 @@ public class KeyboardMixin {
             return;
         }
 
-        if (keyShouldBeIntercepted(key) && Fcitx5.userTyping()) {
-            ci.cancel();
+        if (keyShouldBeIntercepted(key)) {
+            if (Fcitx5.shouldInterceptPreventKey()) {
+                ci.cancel();
+            }
+        } else {
+            Fcitx5.noteUserInput();
         }
     }
 
@@ -73,8 +77,12 @@ public class KeyboardMixin {
         //#else
         //$$ public void onChar(long window, int codePoint, int modifiers, CallbackInfo ci) {
         //#endif
-        if (window == HANDLE && GlobalState.selectingElement) {
-            ci.cancel();
+        if (window == HANDLE) {
+            if (GlobalState.selectingElement) {
+                ci.cancel();
+            } else {
+                Fcitx5.noteUserInput();
+            }
         }
     }
 }
