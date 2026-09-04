@@ -55,15 +55,23 @@ public class KeyboardHandlerMixin {
             return;
         }
 
-        if (keyShouldBeIntercepted(key) && Fcitx5.userTyping()) {
-            ci.cancel();
+        if (keyShouldBeIntercepted(key)) {
+            if (Fcitx5.shouldInterceptPreventKey()) {
+                ci.cancel();
+            }
+        } else {
+            Fcitx5.noteUserInput();
         }
     }
 
     @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
     public void onChar(long window, CharacterEvent input, CallbackInfo ci) {
-        if (window == HANDLE && GlobalState.selectingElement) {
-            ci.cancel();
+        if (window == HANDLE) {
+            if (GlobalState.selectingElement) {
+                ci.cancel();
+            } else {
+                Fcitx5.noteUserInput();
+            }
         }
     }
 }

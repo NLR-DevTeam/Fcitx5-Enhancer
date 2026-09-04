@@ -1,5 +1,6 @@
 package cn.xiaym.fcitx5.mixins;
 
+import cn.xiaym.fcitx5.Fcitx5;
 import cn.xiaym.fcitx5.GlobalState;
 import cn.xiaym.fcitx5.IMBlockerListener;
 import cn.xiaym.fcitx5.config.ModConfig;
@@ -36,6 +37,7 @@ public class GuiMixin {
 
     @Inject(method = "setScreen", at = @At("HEAD"))
     private void setScreen(Screen screen, CallbackInfo ci) {
+        Fcitx5.disarmEndKeyGrace();
         checkBlocker(screen, this.screen);
 
         boolean screenOpening = screen != null;
