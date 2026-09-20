@@ -29,6 +29,4 @@ public class GlobalState {
 
     public static boolean selectingElement = false;
     public static GuiEventListener selectedElement = null;
-
-//    public static String waylandPreedit = null;
 }

@@ -65,27 +65,15 @@ public class Main implements ClientModInitializer {
     }
 
     public static void setScreen(Screen screen) {
-        //#if MC >= 260200
         Minecraft.getInstance().setScreenAndShow(screen);
-        //#else
-        //$$ Minecraft.getInstance().setScreen(screen);
-        //#endif
     }
 
     public static Screen getScreen() {
-        //#if MC >= 260200
         return Minecraft.getInstance().gui.screen();
-        //#else
-        //$$ return Minecraft.getInstance().screen;
-        //#endif
     }
 
     public static ToastManager getToastManager() {
-        //#if MC >= 260200
         return Minecraft.getInstance().gui.toastManager();
-        //#else
-        //$$ return Minecraft.getInstance().getToastManager();
-        //#endif
     }
 
     @Override

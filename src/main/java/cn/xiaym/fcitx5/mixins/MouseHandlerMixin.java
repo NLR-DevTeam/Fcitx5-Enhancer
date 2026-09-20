@@ -18,14 +18,13 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,7 +45,7 @@ public class MouseHandlerMixin {
         ci.cancel();
 
         switch (input.button()) {
-            case GLFW.GLFW_MOUSE_BUTTON_LEFT -> {
+            case SDLMouse.SDL_BUTTON_LEFT -> {
                 if (GlobalState.selectedElement == null) {
                     return;
                 }
@@ -61,7 +60,7 @@ public class MouseHandlerMixin {
                 }));
             }
 
-            case GLFW.GLFW_MOUSE_BUTTON_RIGHT -> {
+            case SDLMouse.SDL_BUTTON_RIGHT -> {
                 ScreenRule rule = ModConfig.getOrCreateScreenRule(screen.getClass().getName());
                 SystemToast.add(Main.getToastManager(), TOAST_TYPE, Component.translatable("fcitx5.selector.completed"), Component.translatable(rule.comment() == null ? "fcitx5.selector.new" : "fcitx5.selector.existing"));
 
@@ -101,8 +100,8 @@ public class MouseHandlerMixin {
     }
 
     @Inject(method = "onDrop", at = @At("HEAD"), cancellable = true)
-    public void onFilesDropped(long window, List<Path> paths, int invalidFilesCount, CallbackInfo ci) {
-        if (window == HANDLE && GlobalState.selectingElement) {
+    public void onFilesDropped(long handle, List<String> rawPaths, CallbackInfo ci) {
+        if (GlobalState.selectingElement) {
             ci.cancel();
         }
     }

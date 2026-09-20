@@ -9,7 +9,6 @@
   "plugin": "cn.xiaym.fcitx5.MixinPlugin",
   "client": [
     "EditBoxMixin",
-    "GameRendererMixin",
     "GuiMixin",
     "KeyboardHandlerMixin",
     "MinecraftMixin",

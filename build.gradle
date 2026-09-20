@@ -1,3 +1,5 @@
+//file:noinspection GroovyUnusedAssignment
+
 buildscript {
     dependencies {
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21'
@@ -10,9 +12,7 @@ plugins {
 }
 
 preprocess {
-    def mc260102 = createNode('26.1.2', 26_01_02, null)
-    def mc260200 = createNode('26.2', 26_02_00, null)
-    mc260102.link(mc260200, null)
+    def mc260300 = createNode('26.3', 26_03_00, null)
 
     strictExtraMappings.set(false)
 }

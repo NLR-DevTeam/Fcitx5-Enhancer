@@ -15,7 +15,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -33,16 +32,13 @@ public class ModConfig {
     private static final HashMap<Class<?>, Deserializer<Object>> INTERNAL_DESERIALIZERS = new HashMap<>();
     public static boolean imBlockerEnabled = true;
     public static boolean enforceDeactivation = true;
-    public static ModifierKeyCode selectElementKey = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_S), Modifier.of(false, true, true));
+    public static ModifierKeyCode selectElementKey = ModifierKeyCode.of(InputConstants.Type.KEYBOARD.getOrCreate(InputConstants.KEY_S), Modifier.of(false, true, true));
     public static boolean builtinCommandSuppressDirect = true;
     public static boolean builtinCommandDisableLater = true;
     @SuppressWarnings("unused")
     public static BuiltinRuleSet.RuleSetBinding[] builtinRuleSets = BuiltinRuleSet.RULESETS;
     public static List<ElementRule> userElementRules = new ArrayList<>();
     public static List<ScreenRule> userScreenRules = new ArrayList<>();
-//    public static boolean nativeWaylandOverlayEnabled = true;
-//    public static int nativeWaylandOverlayX = 10;
-//    public static int nativeWaylandOverlayY = 10;
 
     static {
         register(boolean.class, JsonObject::addProperty, (o, k) -> o.get(k).getAsBoolean());
@@ -50,12 +46,19 @@ public class ModConfig {
 
         register(ModifierKeyCode.class, (o, k, v) -> {
             JsonObject serialized = new JsonObject();
-            serialized.addProperty("base", v.getKeyCode().getValue());
-            serialized.addProperty("modifier", v.getModifier().getValue());
+            if (v != null) {
+                serialized.addProperty("base_v2", v.getKeyCode().getValue());
+                serialized.addProperty("modifier", v.getModifier().getValue());
+            }
+
             o.add(k, serialized);
         }, (o, k) -> {
             JsonObject serialized = o.getAsJsonObject(k);
-            return ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(serialized.get("base")
+            if (!serialized.has("base_v2") || !serialized.has("modifier")) {
+                return null;
+            }
+
+            return ModifierKeyCode.of(InputConstants.Type.KEYBOARD.getOrCreate(serialized.get("base_v2")
                     .getAsInt()), Modifier.of(serialized.get("modifier").getAsShort()));
         });
 
@@ -203,7 +206,10 @@ public class ModConfig {
 
             Class<?> type = configField.getType();
             if (INTERNAL_DESERIALIZERS.containsKey(type)) {
-                configField.set(null, INTERNAL_DESERIALIZERS.get(type).deserialize(object, name));
+                Object result = INTERNAL_DESERIALIZERS.get(type).deserialize(object, name);
+                if (result != null) {
+                    configField.set(ModConfig.class, result);
+                }
             }
         }
     }
@@ -244,7 +250,7 @@ public class ModConfig {
                         .setDefaultValue(true).setSaveConsumer(newValue -> enforceDeactivation = newValue).build())
                 .addEntry(entryBuilder.startModifierKeyCodeField(Component.translatable("fcitx5.config.general.selectElement.title"), selectElementKey)
                         .setTooltip(Component.translatable("fcitx5.config.general.selectElement.tooltip"))
-                        .setDefaultValue(ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_S), Modifier.of(false, true, true)))
+                        .setDefaultValue(ModifierKeyCode.of(InputConstants.Type.KEYBOARD.getOrCreate(InputConstants.KEY_S), Modifier.of(false, true, true)))
                         .setModifierSaveConsumer(newValue -> selectElementKey = newValue).build());
 
         // Built-in rules start
@@ -265,18 +271,6 @@ public class ModConfig {
         builder.getOrCreateCategory(Component.translatable("fcitx5.config.category.userRules"))
                 .addEntry(new UserRuleListSqrEntry<>(Component.translatable("fcitx5.config.userRules.subCategory.elementRules"), userElementRules, true, newValue -> userElementRules = newValue, () -> new ElementRule("", null, null, false)))
                 .addEntry(new UserRuleListSqrEntry<>(Component.translatable("fcitx5.config.userRules.subCategory.screenRules"), userScreenRules, true, newValue -> userScreenRules = newValue, () -> new ScreenRule("", null, false)));
-
-//        builder.getOrCreateCategory(Component.translatable("fcitx5.config.category.nativeWayland"))
-//                .addEntry(entryBuilder.startBooleanToggle(Component.translatable("fcitx5.config.nativeWayland.preeditEnabled.title"), nativeWaylandOverlayEnabled)
-//                        .setTooltip(Component.translatable("fcitx5.config.nativeWayland.preeditEnabled.description"))
-//                        .setDefaultValue(true).setSaveConsumer(newValue -> nativeWaylandOverlayEnabled = newValue)
-//                        .build())
-//                .addEntry(entryBuilder.startIntField(Component.translatable("fcitx5.config.nativeWayland.preeditX.title"), nativeWaylandOverlayX)
-//                        .setTooltip(Component.translatable("fcitx5.config.nativeWayland.preeditX.description"))
-//                        .setDefaultValue(10).setSaveConsumer(newValue -> nativeWaylandOverlayX = newValue).build())
-//                .addEntry(entryBuilder.startIntField(Component.translatable("fcitx5.config.nativeWayland.preeditY.title"), nativeWaylandOverlayY)
-//                        .setTooltip(Component.translatable("fcitx5.config.nativeWayland.preeditY.description"))
-//                        .setDefaultValue(10).setSaveConsumer(newValue -> nativeWaylandOverlayY = newValue).build());
 
         return builder.build();
     }
